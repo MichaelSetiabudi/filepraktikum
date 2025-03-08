@@ -12,8 +12,13 @@ abstract class User(
     abstract val accountType: String
 
     fun topUp(amount: Int) {
-        if (amount < 10000 || amount % 10000 != 0) {
-            println("Top-up harus minimal 10.000 dan kelipatan 10.000")
+        if (amount < 10000) {
+            println("Top-up harus minimal 10.000")
+            return
+        }
+
+        if (amount % 10000 != 0) {
+            println("Top-up harus kelipatan 10.000")
             return
         }
 
@@ -33,8 +38,8 @@ abstract class User(
             return
         }
 
-        balance -= amount
-        recipient.balance += amount
+        balance = balance - amount
+        recipient.balance = recipient.balance + amount
 
         transactions.add("Transferred $amount to ${recipient.name} : - $amount")
         recipient.transactions.add("Received $amount from $name : + $amount")
@@ -49,14 +54,22 @@ abstract class User(
         }
 
         println("Transaction History:")
-        transactions.forEachIndexed { index, transaction ->
-            println("${index + 1}. $transaction")
+
+        var i = 0
+        for (transaction in transactions) {
+            i = i + 1
+            println("$i. $transaction")
         }
     }
 
     fun playGacha(bet: Int): Boolean {
-        if (bet < 10000 || bet % 10000 != 0) {
-            println("Minimal taruhan 10.000 dan harus kelipatan 10.000")
+        if (bet < 10000) {
+            println("Minimal taruhan 10.000")
+            return false
+        }
+
+        if (bet % 10000 != 0) {
+            println("Taruhan harus kelipatan 10.000")
             return false
         }
 
@@ -76,21 +89,23 @@ abstract class User(
             return
         }
 
-        val interestRate = when (option) {
-            1 -> 0.05
-            2 -> 0.10
-            3 -> 0.15 
-            else -> {
-                println("Opsi loan tidak valid")
-                return
-            }
+        var interestRate = 0.0
+        if (option == 1) {
+            interestRate = 0.05
+        } else if (option == 2) {
+            interestRate = 0.10
+        } else if (option == 3) {
+            interestRate = 0.15
+        } else {
+            println("Opsi loan tidak valid")
+            return
         }
 
         val interest = (amount * interestRate).toInt()
         val totalRepayment = amount + interest
 
-        balance += amount
-        loan += totalRepayment
+        balance = balance + amount
+        loan = loan + totalRepayment
 
         transactions.add("Loan received $amount (Repay: $totalRepayment) : + $amount")
         println("Loan berhasil! Saldo baru: $balance, Hutang: $loan")
@@ -101,7 +116,6 @@ abstract class User(
             println("Jumlah pembayaran harus lebih dari 0")
             return
         }
-
         if (amount > balance) {
             println("Saldo tidak mencukupi")
             return
@@ -112,8 +126,8 @@ abstract class User(
             return
         }
 
-        balance -= amount
-        loan -= amount
+        balance = balance - amount
+        loan = loan - amount
 
         transactions.add("Loan repayment $amount : - $amount")
         println("Pembayaran hutang berhasil! Saldo baru: $balance, Hutang: $loan")

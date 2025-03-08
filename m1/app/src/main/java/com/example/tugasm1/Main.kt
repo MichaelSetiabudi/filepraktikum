@@ -1,11 +1,9 @@
 import com.example.tugasm1.PlusUser
 import com.example.tugasm1.StandardUser
 import com.example.tugasm1.User
-import java.util.Scanner
 import kotlin.random.Random
 
 fun main() {
-    val scanner = Scanner(System.`in`)
     val users = mutableListOf<User>()
     var currentUser: User? = null
 
@@ -17,20 +15,26 @@ fun main() {
             println("0. Exit")
             print("Pilihan: ")
 
-            when (val choice = scanner.nextLine()) {
-                "1" -> login(scanner, users)?.let { currentUser = it }
-                "2" -> register(scanner, users)
-                "0" -> {
-                    println("Terima kasih telah menggunakan E-Wallet App")
-                    return
+            val choice = readLine()
+
+            if (choice == "1") {
+                val loggedInUser = login(users)
+                if (loggedInUser != null) {
+                    currentUser = loggedInUser
                 }
-                else -> println("Pilihan tidak valid: $choice")
+            } else if (choice == "2") {
+                register(users)
+            } else if (choice == "0") {
+                println("Terima kasih telah menggunakan E-Wallet App")
+                return
+            } else {
+                println("Pilihan tidak valid: $choice")
             }
         } else {
             println("=== User Menu ===")
-            println("User: ${currentUser!!.name} (${currentUser!!.accountType})")
-            println("Saldo: ${currentUser!!.balance}")
-            println("Hutang: ${currentUser!!.loan}")
+            println("User: ${currentUser.name} (${currentUser.accountType})")
+            println("Saldo: ${currentUser.balance}")
+            println("Hutang: ${currentUser.loan}")
             println("1. Top-up")
             println("2. Transfer")
             println("3. Gacha")
@@ -39,68 +43,75 @@ fun main() {
             println("0. Logout")
 
             print("Pilihan: ")
-            val choice = scanner.nextLine()
+            val choice = readLine()
 
-            when (choice) {
-                "1" -> topUp(scanner, currentUser!!)
-                "2" -> transfer(scanner, currentUser!!, users)
-                "3" -> gacha(scanner, currentUser!!)
-                "4" -> currentUser!!.viewTransactionHistory()
-                "5" -> loanMenu(scanner, currentUser!!)
-                "0" -> {
-                    println("Logout berhasil")
-                    currentUser = null
-                }
-                else -> println("Pilihan tidak valid: $choice")
+            if (choice == "1") {
+                topUp(currentUser)
+            } else if (choice == "2") {
+                transfer(currentUser, users)
+            } else if (choice == "3") {
+                gacha(currentUser)
+            } else if (choice == "4") {
+                currentUser.viewTransactionHistory()
+            } else if (choice == "5") {
+                loanMenu(currentUser)
+            } else if (choice == "0") {
+                println("Logout berhasil")
+                currentUser = null
+            } else {
+                println("Pilihan tidak valid: $choice")
             }
         }
     }
 }
 
-fun register(scanner: Scanner, users: MutableList<User>): Boolean {
+fun register(users: MutableList<User>): Boolean {
     println("=== Register ===")
 
     print("Nomor Telepon: ")
-    val phoneNumber = scanner.nextLine()
+    val phoneNumber = readLine() ?: ""
 
-    if (users.any { it.phoneNumber == phoneNumber }) {
-        println("Nomor telepon sudah terdaftar")
-        return false
+    for (existingUser in users) {
+        if (existingUser.phoneNumber == phoneNumber) {
+            println("Nomor telepon sudah terdaftar")
+            return false
+        }
     }
 
     print("Nama: ")
-    val name = scanner.nextLine()
+    val name = readLine() ?: ""
     if (name.isBlank()) {
         println("Nama tidak boleh kosong")
         return false
     }
 
     print("Password: ")
-    val password = scanner.nextLine()
+    val password = readLine() ?: ""
     if (password.isBlank()) {
         println("Password tidak boleh kosong")
         return false
     }
 
     print("Confirm Password: ")
-    val confirmPassword = scanner.nextLine()
+    val confirmPassword = readLine() ?: ""
     if (password != confirmPassword) {
         println("Password tidak cocok")
         return false
     }
 
     print("Jenis Akun (STANDARD/PLUS): ")
-    val accountType = scanner.nextLine().uppercase()
+    val accountType = (readLine() ?: "").uppercase()
 
     if (accountType != "STANDARD" && accountType != "PLUS") {
         println("Jenis akun tidak valid")
         return false
     }
 
-    val user = if (accountType == "STANDARD") {
-        StandardUser(phoneNumber, name, password)
+    val user: User
+    if (accountType == "STANDARD") {
+        user = StandardUser(phoneNumber, name, password)
     } else {
-        PlusUser(phoneNumber, name, password)
+        user = PlusUser(phoneNumber, name, password)
     }
 
     users.add(user)
@@ -108,47 +119,60 @@ fun register(scanner: Scanner, users: MutableList<User>): Boolean {
     return true
 }
 
-fun login(scanner: Scanner, users: MutableList<User>): User? {
+fun login(users: MutableList<User>): User? {
     println("=== Login ===")
 
     print("Nomor Telepon: ")
-    val phoneNumber = scanner.nextLine()
+    val phoneNumber = readLine() ?: ""
 
     print("Password: ")
-    val password = scanner.nextLine()
+    val password = readLine() ?: ""
 
-    val user = users.find { it.phoneNumber == phoneNumber && it.password == password }
+    var foundUser: User? = null
+    for (user in users) {
+        if (user.phoneNumber == phoneNumber && user.password == password) {
+            foundUser = user
+            break
+        }
+    }
 
-    if (user == null) {
+    if (foundUser == null) {
         println("Nomor telepon atau password salah")
         return null
     }
 
     println("Login berhasil!")
-    return user
+    return foundUser
 }
 
-fun topUp(scanner: Scanner, user: User) {
+fun topUp(user: User) {
     println("=== Top-up ===")
 
     print("Jumlah top-up (min. 10.000, kelipatan 10.000): ")
-    val input = scanner.nextLine()
+    val input = readLine() ?: "0"
 
-    try {
-        val amount = input.toInt()
-        user.topUp(amount)
-    } catch (e: NumberFormatException) {
+    val amount = input.toIntOrNull() ?: 0
+    if (amount <= 0) {
         println("Input tidak valid")
+        return
     }
+
+    user.topUp(amount)
 }
 
-fun transfer(scanner: Scanner, sender: User, users: MutableList<User>) {
+fun transfer(sender: User, users: MutableList<User>) {
     println("=== Transfer ===")
 
     print("Nomor telepon penerima: ")
-    val recipientPhone = scanner.nextLine()
+    val recipientPhone = readLine() ?: ""
 
-    val recipient = users.find { it.phoneNumber == recipientPhone }
+    var recipient: User? = null
+    for (user in users) {
+        if (user.phoneNumber == recipientPhone) {
+            recipient = user
+            break
+        }
+    }
 
     if (recipient == null) {
         println("Nomor telepon tidak terdaftar")
@@ -161,17 +185,18 @@ fun transfer(scanner: Scanner, sender: User, users: MutableList<User>) {
     }
 
     print("Jumlah transfer: ")
-    val input = scanner.nextLine()
+    val input = readLine() ?: "0"
 
-    try {
-        val amount = input.toInt()
-        sender.transfer(amount, recipient)
-    } catch (e: NumberFormatException) {
+    val amount = input.toIntOrNull() ?: 0
+    if (amount <= 0) {
         println("Input tidak valid")
+        return
     }
+
+    sender.transfer(amount, recipient)
 }
 
-fun gacha(scanner: Scanner, user: User) {
+fun gacha(user: User) {
     println("=== Gacha ===")
     println("Selamat datang di High or Low!")
     println("Tebak apakah angka berikutnya lebih tinggi atau lebih rendah")
@@ -179,106 +204,109 @@ fun gacha(scanner: Scanner, user: User) {
     println("Tekan 0 untuk kembali ke menu utama")
 
     print("Jumlah taruhan: ")
-    val betInput = scanner.nextLine()
+    val betInput = readLine() ?: "0"
 
     if (betInput == "0") {
         return
     }
 
-    try {
-        val bet = betInput.toInt()
+    val bet = betInput.toIntOrNull() ?: 0
+    if (bet <= 0) {
+        println("Input tidak valid")
+        return
+    }
 
-        if (!user.playGacha(bet)) {
+    if (!user.playGacha(bet)) {
+        return
+    }
+
+    var currentBet = bet
+    var playing = true
+
+    while (playing) {
+        var currentNumber = Random.nextInt(1, 11)
+        println("Angka saat ini: $currentNumber")
+
+        print("Tebakan (1: High, 2: Low, 0: Exit): ")
+        val guess = readLine() ?: "0"
+
+        if (guess == "0") {
             return
         }
 
-        var currentBet = bet
-        var playing = true
+        if (guess != "1" && guess != "2") {
+            println("Pilihan tidak valid")
+            continue
+        }
 
-        while (playing) {
-            var currentNumber = Random.nextInt(1, 11)
-            println("Angka saat ini: $currentNumber")
+        var nextNumber: Int
+        do {
+            nextNumber = Random.nextInt(1, 11)
+        } while (nextNumber == currentNumber)
 
-            print("Tebakan (1: High, 2: Low, 0: Exit): ")
-            val guess = scanner.nextLine()
+        println("Angka berikutnya: $nextNumber")
 
-            if (guess == "0") {
+        val isHigherGuess = guess == "1"
+        val isHigher = nextNumber > currentNumber
+
+        if ((isHigherGuess && isHigher) || (!isHigherGuess && !isHigher)) {
+            user.balance += currentBet
+            user.transactions.add("Gacha win +$currentBet : +$currentBet")
+            println("Selamat! Anda menang! Saldo baru: ${user.balance}")
+        } else {
+            user.balance -= currentBet
+            user.transactions.add("Gacha lost -$currentBet : -$currentBet")
+            println("Maaf, Anda kalah. Saldo baru: ${user.balance}")
+        }
+
+        print("Ingin main lagi? (y/n): ")
+        val playAgain = (readLine() ?: "n").lowercase()
+
+        if (playAgain != "y") {
+            playing = false
+        } else {
+            print("Jumlah taruhan: ")
+            val newBetInput = readLine() ?: "0"
+
+            if (newBetInput == "0") {
                 return
             }
 
-            if (guess != "1" && guess != "2") {
-                println("Pilihan tidak valid")
-                continue
+            val newBet = newBetInput.toIntOrNull() ?: 0
+            if (newBet <= 0) {
+                println("Input tidak valid")
+                return
             }
 
-            var nextNumber: Int
-            do {
-                nextNumber = Random.nextInt(1, 11)
-            } while (nextNumber == currentNumber)
-
-            println("Angka berikutnya: $nextNumber")
-
-            val isHigherGuess = guess == "1"
-            val isHigher = nextNumber > currentNumber
-
-            if ((isHigherGuess && isHigher) || (!isHigherGuess && !isHigher)) {
-                user.balance += currentBet
-                user.transactions.add("Gacha win +$currentBet : +$currentBet")
-                println("Selamat! Anda menang! Saldo baru: ${user.balance}")
-            } else {
-                user.balance -= currentBet
-                user.transactions.add("Gacha lost -$currentBet : -$currentBet")
-                println("Maaf, Anda kalah. Saldo baru: ${user.balance}")
+            if (!user.playGacha(newBet)) {
+                return
             }
-
-            print("Ingin main lagi? (y/n): ")
-            val playAgain = scanner.nextLine().lowercase()
-
-            if (playAgain != "y") {
-                playing = false
-            } else {
-                print("Jumlah taruhan: ")
-                val newBetInput = scanner.nextLine()
-
-                if (newBetInput == "0") {
-                    return
-                }
-
-                try {
-                    val newBet = newBetInput.toInt()
-                    if (!user.playGacha(newBet)) {
-                        return
-                    }
-                    currentBet = newBet
-                } catch (e: NumberFormatException) {
-                    println("Input tidak valid")
-                    return
-                }
-            }
+            currentBet = newBet
         }
-    } catch (e: NumberFormatException) {
-        println("Input tidak valid")
     }
 }
 
-fun loanMenu(scanner: Scanner, user: User) {
+fun loanMenu(user: User) {
     println("=== Loan ===")
     println("1. Ambil Loan")
     println("2. Bayar Loan")
     println("0. Kembali")
     print("Pilihan: ")
 
-    val choice = scanner.nextLine()
+    val choice = readLine() ?: "0"
 
-    when (choice) {
-        "1" -> takeLoan(scanner, user)
-        "2" -> repayLoan(scanner, user)
-        "0" -> return
-        else -> println("Pilihan tidak valid: $choice")
+    if (choice == "1") {
+        takeLoan(user)
+    } else if (choice == "2") {
+        repayLoan(user)
+    } else if (choice == "0") {
+        return
+    } else {
+        println("Pilihan tidak valid: $choice")
     }
 }
 
-fun takeLoan(scanner: Scanner, user: User) {
+fun takeLoan(user: User) {
     if (!user.canTakeLoan()) {
         println("Anda masih memiliki hutang yang harus dibayar terlebih dahulu")
         return
@@ -292,26 +320,29 @@ fun takeLoan(scanner: Scanner, user: User) {
     println("0. Kembali")
     print("Pilihan: ")
 
-    val choice = scanner.nextLine()
+    val choice = readLine() ?: "0"
 
     if (choice == "0") {
         return
     }
 
-    val amount = when (choice) {
-        "1" -> 200000
-        "2" -> 500000
-        "3" -> 1000000
-        else -> {
-            println("Pilihan tidak valid: $choice")
-            return
-        }
+    var amount = 0
+    if (choice == "1") {
+        amount = 200000
+    } else if (choice == "2") {
+        amount = 500000
+    } else if (choice == "3") {
+        amount = 1000000
+    } else {
+        println("Pilihan tidak valid: $choice")
+        return
     }
 
-    user.takeLoan(choice.toInt(), amount)
+    val choiceNum = choice.toIntOrNull() ?: 0
+    user.takeLoan(choiceNum, amount)
 }
 
-fun repayLoan(scanner: Scanner, user: User) {
+fun repayLoan(user: User) {
     if (user.loan <= 0) {
         println("Anda tidak memiliki hutang")
         return
@@ -322,12 +353,13 @@ fun repayLoan(scanner: Scanner, user: User) {
     println("Saldo Anda: ${user.balance}")
     print("Jumlah pembayaran: ")
 
-    val input = scanner.nextLine()
+    val input = readLine() ?: "0"
 
-    try {
-        val amount = input.toInt()
-        user.repayLoan(amount)
-    } catch (e: NumberFormatException) {
+    val amount = input.toIntOrNull() ?: 0
+    if (amount <= 0) {
         println("Input tidak valid")
+        return
     }
+
+    user.repayLoan(amount)
 }
