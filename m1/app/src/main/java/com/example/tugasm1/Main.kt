@@ -9,11 +9,11 @@ fun main() {
 
     while (true) {
         if (currentUser == null) {
-            println("=== E-Wallet App ===")
+            println("=== Main Menu ===")
             println("1. Login")
             println("2. Register")
             println("0. Exit")
-            print("Pilihan: ")
+            print("Choose an option: ")
 
             val choice = readLine()
 
@@ -25,24 +25,24 @@ fun main() {
             } else if (choice == "2") {
                 register(users)
             } else if (choice == "0") {
-                println("Terima kasih telah menggunakan E-Wallet App")
+                println("See You")
                 return
             } else {
                 println("Pilihan tidak valid: $choice")
             }
         } else {
             println("=== User Menu ===")
-            println("User: ${currentUser.name} (${currentUser.accountType})")
-            println("Saldo: ${currentUser.balance}")
-            println("Hutang: ${currentUser.loan}")
+            println("Welcome, ${currentUser.name}")
+            println("Saldo: Rp ${currentUser.balance}")
+            println("Outstanding Loan: Rp ${currentUser.loan}")
             println("1. Top-up")
             println("2. Transfer")
             println("3. Gacha")
-            println("4. History Transaksi")
-            println("5. Loan")
-            println("0. Logout")
+            println("4. View Transaction History")
+            println("5. Loan (Pinjaman Uang)")
+            println("6. Logout")
 
-            print("Pilihan: ")
+            print("Choose an option: ")
             val choice = readLine()
 
             if (choice == "1") {
@@ -55,7 +55,7 @@ fun main() {
                 currentUser.viewTransactionHistory()
             } else if (choice == "5") {
                 loanMenu(currentUser)
-            } else if (choice == "0") {
+            } else if (choice == "6") {
                 println("Logout berhasil")
                 currentUser = null
             } else {
@@ -115,7 +115,7 @@ fun register(users: MutableList<User>): Boolean {
     }
 
     users.add(user)
-    println("Registrasi berhasil! Silakan login")
+    println("Registrasi berhasil!")
     return true
 }
 
@@ -148,7 +148,7 @@ fun login(users: MutableList<User>): User? {
 fun topUp(user: User) {
     println("=== Top-up ===")
 
-    print("Jumlah top-up (min. 10.000, kelipatan 10.000): ")
+    print("Enter amount to top up (min. 10.000, multiple of 10.000): ")
     val input = readLine() ?: "0"
 
     val amount = input.toIntOrNull() ?: 0
@@ -161,9 +161,8 @@ fun topUp(user: User) {
 }
 
 fun transfer(sender: User, users: MutableList<User>) {
-    println("=== Transfer ===")
 
-    print("Nomor telepon penerima: ")
+    print("Enter recipient phone number: ")
     val recipientPhone = readLine() ?: ""
 
     var recipient: User? = null
@@ -184,7 +183,7 @@ fun transfer(sender: User, users: MutableList<User>) {
         return
     }
 
-    print("Jumlah transfer: ")
+    print("Enter amount to transfer: ")
     val input = readLine() ?: "0"
 
     val amount = input.toIntOrNull() ?: 0
@@ -197,101 +196,76 @@ fun transfer(sender: User, users: MutableList<User>) {
 }
 
 fun gacha(user: User) {
-    println("=== Gacha ===")
-    println("Selamat datang di High or Low!")
-    println("Tebak apakah angka berikutnya lebih tinggi atau lebih rendah")
-    println("Minimal taruhan 10.000 dan harus kelipatan 10.000")
-    println("Tekan 0 untuk kembali ke menu utama")
+    println("=== Gacha High-Low Game ===")
+    println("You will bet an amount (min: 10,000, multiple of 10,000). If you win, you double your money.")
 
-    print("Jumlah taruhan: ")
-    val betInput = readLine() ?: "0"
-
-    if (betInput == "0") {
-        return
-    }
-
-    val bet = betInput.toIntOrNull() ?: 0
-    if (bet <= 0) {
-        println("Input tidak valid")
-        return
-    }
-
-    if (!user.playGacha(bet)) {
-        return
-    }
-
-    var currentBet = bet
     var playing = true
+    var saldo = user.balance
 
     while (playing) {
-        var currentNumber = Random.nextInt(1, 11)
-        println("Angka saat ini: $currentNumber")
+        print("Enter amount to bet (0 to exit): ")
+        val betInput = readLine() ?: "0"
 
-        print("Tebakan (1: High, 2: Low, 0: Exit): ")
-        val guess = readLine() ?: "0"
-
-        if (guess == "0") {
+        if (betInput == "0") {
             return
         }
 
-        if (guess != "1" && guess != "2") {
-            println("Pilihan tidak valid")
+        val bet = betInput.toIntOrNull() ?: 0
+        if (bet < 10000 || bet % 10000 != 0) {
+            println("Invalid bet. Minimum bet is 10,000 and must be a multiple of 10,000.")
+            continue
+        }
+
+        if (bet > saldo) {
+            println("Insufficient balance. Your saldo is Rp $saldo")
+            continue
+        }
+
+        val compareNumber = Random.nextInt(1, 11)
+        print("Guess if the next number (1-10) will be (H)igher or (L)ower than $compareNumber: ")
+        val guess = readLine()?.trim()?.uppercase() ?: ""
+
+        if (guess != "H" && guess != "L") {
+            println("Invalid choice. Please enter H for Higher or L for Lower.")
             continue
         }
 
         var nextNumber: Int
         do {
             nextNumber = Random.nextInt(1, 11)
-        } while (nextNumber == currentNumber)
+        } while (nextNumber == compareNumber)
 
-        println("Angka berikutnya: $nextNumber")
+        println("The number drawn is: $nextNumber")
 
-        val isHigherGuess = guess == "1"
-        val isHigher = nextNumber > currentNumber
+        val isHigherGuess = guess == "H"
+        val isHigher = nextNumber > compareNumber
 
         if ((isHigherGuess && isHigher) || (!isHigherGuess && !isHigher)) {
-            user.balance += currentBet
-            user.transactions.add("Gacha win +$currentBet : +$currentBet")
-            println("Selamat! Anda menang! Saldo baru: ${user.balance}")
+            saldo += bet
+            user.balance = saldo
+            user.transactions.add("Gacha win +$bet : +$bet")
+            println("? You won! Your saldo is now Rp $saldo")
         } else {
-            user.balance -= currentBet
-            user.transactions.add("Gacha lost -$currentBet : -$currentBet")
-            println("Maaf, Anda kalah. Saldo baru: ${user.balance}")
+            saldo -= bet
+            user.balance = saldo
+            user.transactions.add("Gacha lost -$bet : -$bet")
+            println("? You lost! Your saldo is now Rp $saldo")
         }
 
-        print("Ingin main lagi? (y/n): ")
-        val playAgain = (readLine() ?: "n").lowercase()
-
-        if (playAgain != "y") {
-            playing = false
-        } else {
-            print("Jumlah taruhan: ")
-            val newBetInput = readLine() ?: "0"
-
-            if (newBetInput == "0") {
-                return
-            }
-
-            val newBet = newBetInput.toIntOrNull() ?: 0
-            if (newBet <= 0) {
-                println("Input tidak valid")
-                return
-            }
-
-            if (!user.playGacha(newBet)) {
-                return
-            }
-            currentBet = newBet
+        if (saldo < 10000) {
+            println("Your balance is too low to continue playing.")
+            return
         }
     }
 }
 
+
 fun loanMenu(user: User) {
-    println("=== Loan ===")
-    println("1. Ambil Loan")
-    println("2. Bayar Loan")
-    println("0. Kembali")
-    print("Pilihan: ")
+    println("=== Loan Menu(Pinjaman Uang) ===")
+    println("1. Take Loan")
+    println("2. Pay Loan")
+    println("3. Back to User Menu")
+    print("Choose an option: ")
 
     val choice = readLine() ?: "0"
 
@@ -299,7 +273,7 @@ fun loanMenu(user: User) {
         takeLoan(user)
     } else if (choice == "2") {
         repayLoan(user)
-    } else if (choice == "0") {
+    } else if (choice == "3") {
         return
     } else {
         println("Pilihan tidak valid: $choice")
@@ -312,27 +286,27 @@ fun takeLoan(user: User) {
         return
     }
 
-    println("=== Ambil Loan ===")
+    println("=== Available Loan Option ===")
     println("Pilih opsi loan:")
-    println("1. Rp.200.000 (Bunga 5%, Total Rp.210.000)")
-    println("2. Rp.500.000 (Bunga 10%, Total Rp.550.000)")
-    println("3. Rp.1.000.000 (Bunga 15%, Total Rp.1.150.000)")
-    println("0. Kembali")
+    println("1. Rp. 1,000,000 with 10% interest (Total Repay: Rp. 1,100,000)")
+    println("2. Rp. 5,000,000 with 7% interest (Total Repay: Rp. 5,350,000)")
+    println("3. Rp. 10,000,000 with 5% interest (Total Repay: Rp. 10,500,000)")
+    println("4. Cancel Loan request")
     print("Pilihan: ")
 
     val choice = readLine() ?: "0"
 
-    if (choice == "0") {
+    if (choice == "4") {
         return
     }
 
     var amount = 0
     if (choice == "1") {
-        amount = 200000
-    } else if (choice == "2") {
-        amount = 500000
-    } else if (choice == "3") {
         amount = 1000000
+    } else if (choice == "2") {
+        amount = 5000000
+    } else if (choice == "3") {
+        amount = 10000000
     } else {
         println("Pilihan tidak valid: $choice")
         return
@@ -348,13 +322,12 @@ fun repayLoan(user: User) {
         return
     }
 
-    println("=== Bayar Loan ===")
-    println("Hutang Anda: ${user.loan}")
-    println("Saldo Anda: ${user.balance}")
-    print("Jumlah pembayaran: ")
+    print("Enter amount to pay(or enter 0 to cancel): ")
 
     val input = readLine() ?: "0"
-
+    if(input=="0"){
+        return
+    }
     val amount = input.toIntOrNull() ?: 0
     if (amount <= 0) {
         println("Input tidak valid")

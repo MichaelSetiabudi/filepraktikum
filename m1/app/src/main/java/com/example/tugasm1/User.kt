@@ -23,8 +23,8 @@ abstract class User(
         }
 
         balance += amount
-        transactions.add("Top-up $amount : + $amount")
-        println("Top-up berhasil! Saldo baru: $balance")
+        transactions.add("Top-up Rp $amount : + Rp $amount")
+        println("Top-up successful! Your new saldo: Rp $balance")
     }
 
     fun transfer(amount: Int, recipient: User) {
@@ -41,10 +41,10 @@ abstract class User(
         balance = balance - amount
         recipient.balance = recipient.balance + amount
 
-        transactions.add("Transferred $amount to ${recipient.name} : - $amount")
-        recipient.transactions.add("Received $amount from $name : + $amount")
+        transactions.add("Transferred Rp $amount to ${recipient.name} : - Rp $amount")
+        recipient.transactions.add("Received Rp $amount from $name : + Rp $amount")
 
-        println("Transfer berhasil! Saldo baru: $balance")
+        println("Transfer successful! Your new saldo: $balance")
     }
 
     fun viewTransactionHistory() {
@@ -53,7 +53,7 @@ abstract class User(
             return
         }
 
-        println("Transaction History:")
+        println("=== Transaction History ===")
 
         var i = 0
         for (transaction in transactions) {
@@ -91,11 +91,11 @@ abstract class User(
 
         var interestRate = 0.0
         if (option == 1) {
-            interestRate = 0.05
-        } else if (option == 2) {
             interestRate = 0.10
+        } else if (option == 2) {
+            interestRate = 0.07
         } else if (option == 3) {
-            interestRate = 0.15
+            interestRate = 0.05
         } else {
             println("Opsi loan tidak valid")
             return
@@ -130,6 +130,6 @@ abstract class User(
         loan = loan - amount
 
         transactions.add("Loan repayment $amount : - $amount")
-        println("Pembayaran hutang berhasil! Saldo baru: $balance, Hutang: $loan")
+        println("? Payment successful! Remaining loan balance: Rp $loan")
     }
 }
