@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
-class gameActivity : AppCompatActivity() {
+class GameActivity : AppCompatActivity() {
     private lateinit var backBtn: Button
     private lateinit var turnText: TextView
     private lateinit var colorGrid: GridLayout

@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
             if (playerName.isEmpty()) {
                 Toast.makeText(this, "Please enter your name", Toast.LENGTH_SHORT).show()
             } else {
-                val intent = Intent(this, gameActivity::class.java)
+                val intent = Intent(this, GameActivity::class.java)
                 intent.putExtra("PLAYER_NAME", playerName)
                 startActivity(intent)
             }
