@@ -14,6 +14,7 @@ import androidx.core.view.WindowInsetsCompat
 
 class GameActivity : AppCompatActivity() {
     private lateinit var backBtn: Button
+
     private lateinit var turnText: TextView
     private lateinit var colorGrid: GridLayout
     private lateinit var powerUpBtn: Button
@@ -199,7 +200,11 @@ class GameActivity : AppCompatActivity() {
             isGameOver = true
             Toast.makeText(this, "Game Over!", Toast.LENGTH_LONG).show()
 
-            val intent = Intent(this, MainActivity::class.java)
+            // Navigate to LeaderboardActivity instead of MainActivity
+            val intent = Intent(this, LeaderboardActivity::class.java)
+            // Pass the player's name and turns to the leaderboard
+            intent.putExtra("PLAYER_NAME", playerName)
+            intent.putExtra("PLAYER_TURNS", turns)
             startActivity(intent)
             finish()
         }
