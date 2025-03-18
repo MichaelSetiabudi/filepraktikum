@@ -204,9 +204,7 @@ class GameActivity : AppCompatActivity() {
             isGameOver = true
             Toast.makeText(this, "Game Over!", Toast.LENGTH_LONG).show()
 
-            // Navigate to LeaderboardActivity instead of MainActivity
             val intent = Intent(this, LeaderboardActivity::class.java)
-            // Pass the player's name and turns to the leaderboard
             intent.putExtra("PLAYER_NAME", playerName)
             intent.putExtra("PLAYER_TURNS", turns)
             startActivity(intent)

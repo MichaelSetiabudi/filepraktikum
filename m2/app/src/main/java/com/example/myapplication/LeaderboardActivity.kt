@@ -63,17 +63,13 @@ class LeaderboardActivity : AppCompatActivity() {
             }
         }
 
-        // Add new score
         currentScores.add(Pair(name, turns))
 
-        // Sort by turns (ascending)
         currentScores.sortBy { it.second }
 
-        // Save back (max 20 entries)
         val editor = sharedPref.edit()
-        editor.clear() // Clear existing entries
+        editor.clear()
 
-        // Save up to 20 entries
         for (i in currentScores.indices.take(20)) {
             editor.putString("player_$i", currentScores[i].first)
             editor.putInt("turns_$i", currentScores[i].second)
@@ -85,7 +81,6 @@ class LeaderboardActivity : AppCompatActivity() {
     private fun displayLeaderboard() {
         val sharedPref = getSharedPreferences("LeaderboardPrefs", Context.MODE_PRIVATE)
 
-        // Get top 5 scores
         val scores = mutableListOf<Pair<String, Int>>()
 
         for (i in 0 until 20) {
@@ -99,7 +94,6 @@ class LeaderboardActivity : AppCompatActivity() {
             }
         }
 
-        // Display scores (top 5)
         for (i in 0 until minOf(5, scores.size)) {
             leaderboardEntries[i].text = "${i+1}. ${scores[i].first} - ${scores[i].second} turns"
         }
