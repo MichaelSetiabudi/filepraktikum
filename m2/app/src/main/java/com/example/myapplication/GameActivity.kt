@@ -67,7 +67,8 @@ class GameActivity : AppCompatActivity() {
         powerUpBtn.isEnabled = false
         powerUpBtn.setBackgroundColor(Color.GRAY)
         powerUpBtn.setOnClickListener {
-            if (isPowerUpActive) {
+            if (powerUpBtn.isEnabled && !isPowerUpActive) {
+                isPowerUpActive = true
                 Toast.makeText(this, "Power-up activated! Click any block to clear its row and column.", Toast.LENGTH_SHORT).show()
             }
         }
@@ -135,7 +136,10 @@ class GameActivity : AppCompatActivity() {
             val clearCount = clearConnectedBlocks(row, col, clickedColor, mutableSetOf())
 
             if (clearCount >= 4) {
-                activatePowerUp()
+                // Only make power-up available, don't activate it yet
+                powerUpBtn.setBackgroundColor(Color.rgb(255, 165, 0)) // Orange color
+                powerUpBtn.isEnabled = true
+                Toast.makeText(this, "Power-up available!", Toast.LENGTH_SHORT).show()
             }
 
             turns++
@@ -178,11 +182,11 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun activatePowerUp() {
-        isPowerUpActive = true
         powerUpBtn.setBackgroundColor(Color.rgb(255, 165, 0))
         powerUpBtn.isEnabled = true
         Toast.makeText(this, "Power-up available!", Toast.LENGTH_SHORT).show()
     }
+
 
     private fun checkGameOver() {
         var allInactive = true
