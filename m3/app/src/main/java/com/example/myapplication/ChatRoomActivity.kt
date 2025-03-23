@@ -1,9 +1,5 @@
 package com.example.myapplication
-
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -53,10 +49,14 @@ class ChatRoomActivity : AppCompatActivity() {
         tvChatHeader.text = friendName
 
         rvMessages.layoutManager = LinearLayoutManager(this)
-        adapter = MessageAdapter()
+        adapter = MessageAdapter(
+            chatKey,
+            UserData.currentUserPhone,
+            UserData.currentUserName,
+            friendName
+        )
         rvMessages.adapter = adapter
 
-        // Scroll to the last message if there are any messages
         if ((UserData.messages[chatKey]?.size ?: 0) > 0) {
             rvMessages.scrollToPosition(UserData.messages[chatKey]?.size?.minus(1) ?: 0)
         }
@@ -93,50 +93,5 @@ class ChatRoomActivity : AppCompatActivity() {
         rvMessages.scrollToPosition(UserData.messages[chatKey]?.size?.minus(1) ?: 0)
 
         etMessage.setText("")
-    }
-
-    inner class MessageAdapter : RecyclerView.Adapter<MessageAdapter.ViewHolder>() {
-
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val tvSender: TextView = view.findViewById(R.id.tvSender)
-            val tvContent: TextView = view.findViewById(R.id.tvContent)
-            val tvTimestamp: TextView = view.findViewById(R.id.tvTimestamp)
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val layout = if (viewType == 0) {
-                R.layout.item_message_sent
-            } else {
-                R.layout.item_message_received
-            }
-
-            val view = LayoutInflater.from(parent.context).inflate(layout, parent, false)
-            return ViewHolder(view)
-        }
-
-        override fun getItemCount(): Int {
-            return UserData.messages[chatKey]?.size ?: 0
-        }
-
-        override fun getItemViewType(position: Int): Int {
-            val message = UserData.messages[chatKey]?.get(position)
-            return if (message?.sender == UserData.currentUserPhone) 0 else 1
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val message = UserData.messages[chatKey]?.get(position)
-
-            if (message != null) {
-                val senderName = if (message.sender == UserData.currentUserPhone) {
-                    UserData.currentUserName
-                } else {
-                    friendName
-                }
-
-                holder.tvSender.text = senderName
-                holder.tvContent.text = message.content
-                holder.tvTimestamp.text = message.timestamp
-            }
-        }
     }
 }
