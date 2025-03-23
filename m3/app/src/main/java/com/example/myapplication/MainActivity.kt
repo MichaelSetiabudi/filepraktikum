@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
         val pass = etPassword.text.toString().trim()
 
         if (phone.isEmpty() || pass.isEmpty()) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Semua harus diisi!", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
             if (UserData.users[i].phone == phone && UserData.users[i].password == pass) {
                 UserData.currentUserPhone = phone
                 UserData.currentUserName = UserData.users[i].name
-                UserData.loadUserFriends() // Add this line to load user's friends
+                UserData.loadUserFriends()
                 val intent = Intent(this, HomeActivity::class.java)
                 startActivity(intent)
                 finish()
@@ -59,6 +59,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        Toast.makeText(this, "Wrong phone or password", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Password Salah atau Nomor Telepon tidak terdaftar", Toast.LENGTH_SHORT).show()
     }
 }
