@@ -7,23 +7,18 @@ class UserData {
         val users = mutableListOf<User>()
         var currentUserPhone = ""
         var currentUserName = ""
-
-        // Replace the single friends list with a map of friendships
         val userFriends = mutableMapOf<String, MutableList<String>>()
 
-        // This property will give us the current user's friends
         val friends: MutableList<String>
             get() = userFriends[currentUserPhone] ?: mutableListOf()
 
         val messages = mutableMapOf<String, MutableList<Message>>()
 
-        // Add this function to load a user's friends
         fun loadUserFriends() {
             if (!userFriends.containsKey(currentUserPhone)) {
                 userFriends[currentUserPhone] = mutableListOf()
             }
 
-            // Load reciprocal friendships from messages
             for (chatKey in messages.keys) {
                 val participants = chatKey.split("-")
                 if (participants.size == 2) {
@@ -37,7 +32,6 @@ class UserData {
             }
         }
 
-        // Update this method for adding friends
         fun addFriend(friendPhone: String) {
             if (!userFriends.containsKey(currentUserPhone)) {
                 userFriends[currentUserPhone] = mutableListOf()

@@ -44,12 +44,12 @@ class RegisterActivity : AppCompatActivity() {
         val confirmPass = etConfirmPassword.text.toString().trim()
 
         if (phone.isEmpty() || name.isEmpty() || pass.isEmpty() || confirmPass.isEmpty()) {
-            Toast.makeText(this, "Fill all fields", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Semua field harus diisi!", Toast.LENGTH_SHORT).show()
             return
         }
 
         if (pass != confirmPass) {
-            Toast.makeText(this, "Passwords don't match", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Password tidak sama", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -62,7 +62,7 @@ class RegisterActivity : AppCompatActivity() {
         }
 
         if (phoneExists) {
-            Toast.makeText(this, "Phone already used", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Nomor Telepon telah digunakan", Toast.LENGTH_SHORT).show()
             return
         }
 

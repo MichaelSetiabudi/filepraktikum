@@ -65,9 +65,8 @@ class ChatRoomActivity : AppCompatActivity() {
             sendMessage()
         }
 
-        // Handle back button click
         btnBack.setOnClickListener {
-            finish() // This will close the current activity and go back to the previous one
+            finish()
         }
     }
 

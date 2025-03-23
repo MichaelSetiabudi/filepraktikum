@@ -44,9 +44,7 @@ class FriendAdapter(private val context: HomeActivity) : RecyclerView.Adapter<Fr
         } else {
             "$friendPhone-${UserData.currentUserPhone}"
         }
-
         val messages = UserData.messages[chatKey]
-
         if (messages == null || messages.isEmpty()) {
             holder.tvLastMessage.text = "No messages yet"
             holder.tvLastMessage.setTypeface(null, 0)
