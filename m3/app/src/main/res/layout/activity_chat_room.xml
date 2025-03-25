@@ -10,36 +10,54 @@
         android:id="@+id/chatHeaderLayout"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="#128C7E"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:background="#009688"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
 
+    <!-- Logo Android -->
         <ImageView
-            android:id="@+id/btnBack"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:id="@+id/ivAndroidLogo"
+            android:layout_width="44dp"
+            android:layout_height="39dp"
             android:layout_marginStart="16dp"
-            android:src="@android:drawable/ic_media_previous"
+            android:src="@drawable/baseline_android_24"
             android:tint="#FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/tvChatHeader"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="Friend Name"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
+    <!-- Nama Teman -->
+    <TextView
+        android:id="@+id/tvChatHeader"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="Friend Name"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnBack"
+        app:layout_constraintStart_toEndOf="@+id/ivAndroidLogo"
+        app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="59dp"
+            android:layout_height="49dp"
+            android:layout_marginEnd="16dp"
+            android:background="?attr/selectableItemBackground"
+            android:padding="8dp"
+            android:text=""
+            app:icon="@android:drawable/ic_media_previous"
+            app:iconTint="#FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/btnBack"
             app:layout_constraintTop_toTopOf="parent" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvMessages"

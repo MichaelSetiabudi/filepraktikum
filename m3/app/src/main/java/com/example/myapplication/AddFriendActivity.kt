@@ -75,13 +75,11 @@ class AddFriendActivity : AppCompatActivity() {
             return
         }
 
-        // Check if already in friends list
         if (UserData.friends.contains(foundUserPhone)) {
             Toast.makeText(this, "Already added as friend", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Add friend using the new method
         UserData.addFriend(foundUserPhone)
         Toast.makeText(this, "Friend added", Toast.LENGTH_SHORT).show()
         finish()
