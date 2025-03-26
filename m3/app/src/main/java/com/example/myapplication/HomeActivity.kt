@@ -28,7 +28,7 @@ class HomeActivity : AppCompatActivity() {
         btnAddFriend = findViewById(R.id.btnAddFriend)
         rvFriends = findViewById(R.id.rvFriends)
 
-        tvUserInfo.text = "${UserData.currentUserName} (${UserData.currentUserPhone})"
+        tvUserInfo.text = "${UserData.currentUserName}\n(${UserData.currentUserPhone})"
 
         rvFriends.layoutManager = LinearLayoutManager(this)
         adapter = FriendAdapter(this)

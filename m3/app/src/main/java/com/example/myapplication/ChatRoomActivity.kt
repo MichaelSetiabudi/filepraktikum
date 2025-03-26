@@ -12,7 +12,7 @@ import java.util.Date
 import java.util.Locale
 
 class ChatRoomActivity : AppCompatActivity() {
-    lateinit var btnBack: ImageView
+    lateinit var btnBack: Button
     lateinit var tvChatHeader: TextView
     lateinit var rvMessages: RecyclerView
     lateinit var etMessage: EditText
