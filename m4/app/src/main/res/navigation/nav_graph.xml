@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.coin_clicker.HomeFragment"
+        android:label="Home" />
+
+    <fragment
+        android:id="@+id/upgradesFragment"
+        android:name="com.example.coin_clicker.UpgradesFragment"
+        android:label="Upgrades" />
+
+    <fragment
+        android:id="@+id/shopFragment"
+        android:name="com.example.coin_clicker.ShopFragment"
+        android:label="Shop" />
+
+    <fragment
+        android:id="@+id/prestigeFragment"
+        android:name="com.example.coin_clicker.PrestigeFragment"
+        android:label="Prestige" />
+
+</navigation>

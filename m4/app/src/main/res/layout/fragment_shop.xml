@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="72dp"
+        android:paddingStart="16dp"
+        android:paddingTop="16dp"
+        android:text="Developer Coin Shop (Cheat)"
+        android:textColor="@android:color/black"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvCurrentCoins"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Coins"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:paddingTop="16dp"
+        android:paddingEnd="16dp" />
+
+    <Button
+        android:id="@+id/btnGet1K"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Get 1K"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        android:background="@color/purple_500"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:paddingVertical="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="16dp" />
+
+    <Button
+        android:id="@+id/btnGet1M"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Get 1M"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/btnGet1K"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@color/purple_500"
+        android:paddingVertical="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="16dp" />
+
+    <Button
+        android:id="@+id/btnGet1B"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Get 1B"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/btnGet1M"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@color/purple_500"
+        android:paddingVertical="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="16dp" />
+
+    <Button
+        android:id="@+id/btnGet1T"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Get 1T"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/btnGet1B"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@color/purple_500"
+        android:paddingVertical="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="16dp" />
+
+    <Button
+        android:id="@+id/btnGet1Qa"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Get 1Qa"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/btnGet1T"
+        app:layout_constraintStart_toStartOf="parent"
+        android:background="@color/purple_500"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:paddingVertical="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="16dp" />
+
+    <Button
+        android:id="@+id/btnGet1Qi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/purple_500"
+        android:text="Get 1Qi"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/btnGet1Qa"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:paddingVertical="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="16dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
