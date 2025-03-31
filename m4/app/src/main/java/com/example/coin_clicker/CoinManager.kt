@@ -3,7 +3,7 @@ package com.example.coin_clicker
 
 class CoinManager {
 
-    var totalCoins: Long = 1
+    var totalCoins: Long = 0
         private set
 
     var coinsPerSecond: Long = 0
@@ -28,7 +28,8 @@ class CoinManager {
         private set
     var prestigeBonus: Double = 1.0
         private set
-   fun addCoins(amount: Long) {
+
+    fun addCoins(amount: Long) {
         totalCoins += (amount * prestigeBonus).toLong()
     }
 
@@ -42,8 +43,8 @@ class CoinManager {
 
     fun upgradeClickPower(): Boolean {
         if (subtractCoins(clickPowerCost)) {
-            clickPower = (clickPower * 1.2).toLong()
-            clickPowerCost = (clickPowerCost * 1.5).toLong()
+            clickPower += 1  // Tambah 1 setiap kali upgrade
+            clickPowerCost = (clickPowerCost * 1.5).toLong()  // Naikkan cost
             return true
         }
         return false
@@ -61,7 +62,7 @@ class CoinManager {
 
     fun upgradeAutoClickPower(): Boolean {
         if (subtractCoins(autoClickPowerCost)) {
-            autoClickPower = (autoClickPower * 1.2).toLong()
+            autoClickPower += 1  // Tambah 1 setiap kali upgrade, sama seperti clickPower
             autoClickPowerCost = (autoClickPowerCost * 1.5).toLong()
             updateCoinsPerSecond()
             return true
@@ -70,9 +71,9 @@ class CoinManager {
     }
 
     private fun updateCoinsPerSecond() {
-        coinsPerSecond = ((autoClickers * autoClickPower) * prestigeBonus).toLong()
+        val clicksPerSecond = autoClickers // 1 click per second per auto-clicker
+        coinsPerSecond = ((clicksPerSecond * autoClickPower) * prestigeBonus).toLong()
     }
-
     fun resetForPrestige(): Int {
         val newPrestigePoints = (totalCoins / 1_000_000_000L).toInt()
         prestigePoints += newPrestigePoints
@@ -82,7 +83,7 @@ class CoinManager {
         coinsPerSecond = 0L
         clickPower = 1L
         autoClickers = 0
-        autoClickPower = 1L
+        autoClickPower = 1L  // Reset ke 1
         clickPowerCost = 10L
         autoClickerCost = 50L
         autoClickPowerCost = 100L

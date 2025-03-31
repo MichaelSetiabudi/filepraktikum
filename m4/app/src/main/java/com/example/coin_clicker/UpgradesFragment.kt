@@ -5,55 +5,82 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [UpgradesFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class UpgradesFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var btnClickPower: Button
+    private lateinit var btnAutoClicker: Button
+    private lateinit var btnAutoClickPower: Button
+    private lateinit var viewModel: GameViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_upgrades, container, false)
+        val view = inflater.inflate(R.layout.fragment_upgrades, container, false)
+
+        // Initialize ViewModel
+        viewModel = ViewModelProvider(requireActivity())[GameViewModel::class.java]
+
+        // Initialize views
+        btnClickPower = view.findViewById(R.id.btnClickPower)
+        btnAutoClicker = view.findViewById(R.id.btnAutoClicker)
+        btnAutoClickPower = view.findViewById(R.id.btnAutoClickPower)
+
+        // Setup click listeners
+        btnClickPower.setOnClickListener {
+            if (viewModel.upgradeClickPower()) {
+                updateUI()
+            } else {
+                Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        btnAutoClicker.setOnClickListener {
+            if (viewModel.buyAutoClicker()) {
+                updateUI()
+            } else {
+                Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        btnAutoClickPower.setOnClickListener {
+            if (viewModel.upgradeAutoClickPower()) {
+                updateUI()
+            } else {
+                Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        updateUI()
+
+        return view
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment UpgradesFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            UpgradesFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onResume() {
+        super.onResume()
+        updateUI()
+    }
+
+    private fun updateUI() {
+        btnClickPower.text = "Upgrade Click Power (${viewModel.getFormattedClickPowerCost()})\n" +
+                "Current: +${viewModel.getClickPower()} coins/click"
+
+        val clicksInfo = if (viewModel.getAutoClickers() > 0) {
+            "1 click/sec each (total: ${viewModel.getClicksPerSecond()} clicks/sec)"
+        } else {
+            "0 clicks/sec"
+        }
+        btnAutoClicker.text = "Buy Auto Clicker (${viewModel.getFormattedAutoClickerCost()})\n" +
+                "Current: ${viewModel.getAutoClickers()} clickers - $clicksInfo"
+
+        // Tampilkan informasi autoClickPower dan cost
+        btnAutoClickPower.text = "Upgrade Auto Click Power (${viewModel.getFormattedAutoClickPowerCost()})\n" +
+                "Current: +${viewModel.getAutoClickPower()} coins/auto-click"
     }
 }
