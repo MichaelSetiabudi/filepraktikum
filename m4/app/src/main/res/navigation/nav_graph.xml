@@ -22,6 +22,10 @@
     <fragment
         android:id="@+id/prestigeFragment"
         android:name="com.example.coin_clicker.PrestigeFragment"
-        android:label="Prestige" />
+        android:label="Prestige">
+        <action
+            android:id="@+id/action_prestigeFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+    </fragment>
 
 </navigation>

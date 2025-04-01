@@ -20,6 +20,16 @@ class GameViewModel : ViewModel() {
         }
     }
 
+    // Add coins from shop (cheat)
+    fun addCoinsFromShop(amount: Long) {
+        coinManager.addCoinsFromShop(amount)
+    }
+
+    // Calculate potential prestige points (new method)
+    fun calculatePotentialPrestigePoints(): Int {
+        return coinManager.calculatePotentialPrestigePoints()
+    }
+
     // Upgrade functions
     fun upgradeClickPower(): Boolean {
         return coinManager.upgradeClickPower()
@@ -31,6 +41,11 @@ class GameViewModel : ViewModel() {
 
     fun upgradeAutoClickPower(): Boolean {
         return coinManager.upgradeAutoClickPower()
+    }
+
+    // Prestige function
+    fun resetForPrestige(): Int {
+        return coinManager.resetForPrestige()
     }
 
     // Getters for UI
@@ -68,6 +83,15 @@ class GameViewModel : ViewModel() {
 
     fun getTotalCoins(): Long {
         return coinManager.totalCoins
+    }
+
+    // Get prestige information
+    fun getPrestigePoints(): Int {
+        return coinManager.prestigePoints
+    }
+
+    fun getPrestigeBonus(): Double {
+        return coinManager.prestigeBonus
     }
 
     // Fungsi tambahan untuk menampilkan jumlah klik per detik untuk autoClicker

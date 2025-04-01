@@ -1,22 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- Coins display in top right -->
     <TextView
-        android:id="@+id/tvPrestigePoints"
+        android:id="@+id/tvCoinsDisplay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Prestige Points: 0"
-        android:textSize="18sp" />
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:text="0"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
-    <Button
-        android:id="@+id/btnReset"
+    <!-- Prestige info container -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Reset and Prestige" />
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="16dp"
+        android:background="#EEEEEE">
 
-</LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="PRESTIGE"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/tvPrestigePoints"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Current Prestige Points: 0"
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvCurrentCoins"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Your Coins: 0"
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvPotentialPrestige"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Potential Prestige Points: 0"
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvPrestigeBonus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Current Bonus: +0.0% to all income"
+            android:textSize="18sp"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Prestige will reset all your upgrades and coins, but you'll get permanent prestige points!"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/btnReset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Reset and Prestige"
+            android:enabled="false" />
+    </LinearLayout>
+</RelativeLayout>
