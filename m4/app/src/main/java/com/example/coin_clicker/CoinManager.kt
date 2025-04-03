@@ -117,7 +117,6 @@ class CoinManager {
 
             return newPrestigePoints
         }
-
         return 0
     }
 
