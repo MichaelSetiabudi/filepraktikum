@@ -8,49 +8,66 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import com.example.coin_clicker.MainActivity
 
 class UpgradesFragment : Fragment() {
 
-    private lateinit var btnClickPower: Button
-    private lateinit var btnAutoClicker: Button
-    private lateinit var btnAutoClickPower: Button
-    private lateinit var viewModel: GameViewModel
+    private lateinit var tvCoins: TextView
+    private lateinit var tvClickPower: TextView
+    private lateinit var tvClickPowerCost: TextView
+    private lateinit var btnUpgradeClickPower: Button
+
+    private lateinit var tvAutoClickers: TextView
+    private lateinit var tvAutoClickersCost: TextView
+    private lateinit var btnUpgradeAutoClicker: Button
+
+    private lateinit var tvAutoClickPower: TextView
+    private lateinit var tvAutoClickPowerCost: TextView
+    private lateinit var btnUpgradeAutoClickPower: Button
+
+    private lateinit var mainActivity: MainActivity
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_upgrades, container, false)
 
-        // Initialize ViewModel
-        viewModel = ViewModelProvider(requireActivity())[GameViewModel::class.java]
+        mainActivity = requireActivity() as MainActivity
 
-        // Initialize views
-        btnClickPower = view.findViewById(R.id.btnClickPower)
-        btnAutoClicker = view.findViewById(R.id.btnAutoClicker)
-        btnAutoClickPower = view.findViewById(R.id.btnAutoClickPower)
+        tvCoins = view.findViewById(R.id.tvCoins)
+        tvClickPower = view.findViewById(R.id.tvClickPower)
+        tvClickPowerCost = view.findViewById(R.id.tvClickPowerCost)
+        btnUpgradeClickPower = view.findViewById(R.id.btnUpgradeClickPower)
+
+        tvAutoClickers = view.findViewById(R.id.tvAutoClickers)
+        tvAutoClickersCost = view.findViewById(R.id.tvAutoClickersCost)
+        btnUpgradeAutoClicker = view.findViewById(R.id.btnUpgradeAutoClicker)
+
+        tvAutoClickPower = view.findViewById(R.id.tvAutoClickPower)
+        tvAutoClickPowerCost = view.findViewById(R.id.tvAutoClickPowerCost)
+        btnUpgradeAutoClickPower = view.findViewById(R.id.btnUpgradeAutoClickPower)
 
         // Setup click listeners
-        btnClickPower.setOnClickListener {
-            if (viewModel.upgradeClickPower()) {
+        btnUpgradeClickPower.setOnClickListener {
+            if (mainActivity.upgradeClickPower()) {
                 updateUI()
             } else {
                 Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT).show()
             }
         }
 
-        btnAutoClicker.setOnClickListener {
-            if (viewModel.buyAutoClicker()) {
+        btnUpgradeAutoClicker.setOnClickListener {
+            if (mainActivity.buyAutoClicker()) {
                 updateUI()
             } else {
                 Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT).show()
             }
         }
 
-        btnAutoClickPower.setOnClickListener {
-            if (viewModel.upgradeAutoClickPower()) {
+        btnUpgradeAutoClickPower.setOnClickListener {
+            if (mainActivity.upgradeAutoClickPower()) {
                 updateUI()
             } else {
                 Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT).show()
@@ -62,25 +79,16 @@ class UpgradesFragment : Fragment() {
         return view
     }
 
-    override fun onResume() {
-        super.onResume()
-        updateUI()
-    }
-
     private fun updateUI() {
-        btnClickPower.text = "Upgrade Click Power (${viewModel.getFormattedClickPowerCost()})\n" +
-                "Current: +${viewModel.getClickPower()} coins/click"
+        tvCoins.text = "Coins: ${mainActivity.getFormattedCoins()}"
 
-        val clicksInfo = if (viewModel.getAutoClickers() > 0) {
-            "1 click/sec each (total: ${viewModel.getClicksPerSecond()} clicks/sec)"
-        } else {
-            "0 clicks/sec"
-        }
-        btnAutoClicker.text = "Buy Auto Clicker (${viewModel.getFormattedAutoClickerCost()})\n" +
-                "Current: ${viewModel.getAutoClickers()} clickers - $clicksInfo"
+        tvClickPower.text = "Click Power: ${mainActivity.clickPower}"
+        tvClickPowerCost.text = "Upgrade Cost: ${mainActivity.getFormattedClickPowerCost()}"
 
-        // Tampilkan informasi autoClickPower dan cost
-        btnAutoClickPower.text = "Upgrade Auto Click Power (${viewModel.getFormattedAutoClickPowerCost()})\n" +
-                "Current: +${viewModel.getAutoClickPower()} coins/auto-click"
+        tvAutoClickers.text = "Auto Clickers: ${mainActivity.autoClickers}"
+        tvAutoClickersCost.text = "Upgrade Cost: ${mainActivity.getFormattedAutoClickerCost()}"
+
+        tvAutoClickPower.text = "Auto Click Power: ${mainActivity.autoClickPower}"
+        tvAutoClickPowerCost.text = "Upgrade Cost: ${mainActivity.getFormattedAutoClickPowerCost()}"
     }
 }

@@ -8,72 +8,75 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.lifecycle.ViewModelProvider
+import com.example.coin_clicker.MainActivity
 
 class HomeFragment : Fragment() {
 
     private lateinit var tvCoins: TextView
     private lateinit var tvCPS: TextView
-    private lateinit var viewModel: GameViewModel
+    private lateinit var mainActivity: MainActivity
+    private lateinit var viewRoot: View
+
     private val handler = Handler(Looper.getMainLooper())
-    private lateinit var autoClickerRunnable: Runnable
+    private val autoClickRunnable = object : Runnable {
+        override fun run() {
+            if (isAdded && ::mainActivity.isInitialized && mainActivity.autoClickers > 0) {
+                mainActivity.onAutoClick()
+                updateUI()
+                handler.postDelayed(this, 1000)
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
-        // Initialize ViewModel
-        viewModel = ViewModelProvider(requireActivity())[GameViewModel::class.java]
+        mainActivity = requireActivity() as MainActivity
 
-        // Initialize views
         tvCoins = view.findViewById(R.id.tvCoins)
         tvCPS = view.findViewById(R.id.tvCPS)
+        viewRoot = view
 
-        // Setup click listeners
         view.setOnClickListener {
-            viewModel.onClick()
+            mainActivity.onClick()
             updateUI()
         }
 
-        // Setup auto clicker sesuai kriteria
-        autoClickerRunnable = object : Runnable {
-            override fun run() {
-                if (isAdded) {
-                    viewModel.onAutoClick()
-                    updateUI()
-                    // Always use postDelayed to schedule next execution
-                    handler.postDelayed(this, 1000) // Run every second
-                }
-            }
-        }
-
         updateUI()
-        startAutoClicker()
 
         return view
     }
 
     private fun updateUI() {
-        if (isAdded) {
-            tvCoins.text = viewModel.getFormattedCoins()
-            tvCPS.text = "${viewModel.getFormattedCoinsPerSecond()} coins/sec"
+        if (isAdded && ::mainActivity.isInitialized) {
+            tvCoins.text = mainActivity.getFormattedCoins()
+            val cps = mainActivity.autoClickers * mainActivity.autoClickPower
+            tvCPS.text = "$cps coins/sec"
         }
     }
 
     private fun startAutoClicker() {
-        handler.postDelayed(autoClickerRunnable, 1000)
+        stopAutoClicker()
+        if (mainActivity.autoClickers > 0) {
+            handler.post(autoClickRunnable)
+        }
     }
-    override fun onPause() {
-        super.onPause()
-        handler.removeCallbacks(autoClickerRunnable)
+
+    private fun stopAutoClicker() {
+        handler.removeCallbacks(autoClickRunnable)
     }
 
     override fun onResume() {
         super.onResume()
-        updateUI()
         startAutoClicker()
+        updateUI()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        stopAutoClicker()
     }
 }

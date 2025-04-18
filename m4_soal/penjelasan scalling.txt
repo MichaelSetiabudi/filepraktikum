@@ -1,0 +1,32 @@
+Click Power Upgrades
+
+Cost: 10 * (1.8^level)
+Amount: +1 per level
+
+Level 1: 10 coins → Click Power = 2
+Level 2: 18 coins → Click Power = 3
+Level 5: 105 coins → Click Power = 6
+Level 10: 1,074 coins → Click Power = 11
+Level 20: 190,120 coins → Click Power = 21
+
+Auto Clicker Upgrades
+
+Cost: 50 * (2.1^level)
+Amount: +1 per level (clicks per second)
+
+Level 1: 50 coins → 1 click/sec
+Level 2: 105 coins → 2 clicks/sec
+Level 5: 1,103 coins → 5 clicks/sec
+Level 10: 54,080 coins → 10 clicks/sec
+Level 15: 2,654,022 coins → 15 clicks/sec
+
+Auto Click Power Upgrades
+
+Cost: 100 * (2.4^level)
+Amount: +1 per level
+
+Level 1: 100 coins → Auto Click Power = 2
+Level 2: 240 coins → Auto Click Power = 3
+Level 5: 3,317 coins → Auto Click Power = 6
+Level 10: 248,084 coins → Auto Click Power = 11
+Level 15: 18,559,560 coins → Auto Click Power = 16

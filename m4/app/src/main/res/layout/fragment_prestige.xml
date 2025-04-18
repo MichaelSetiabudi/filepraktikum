@@ -1,85 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:background="@color/white">
 
-    <!-- Coins display in top right -->
     <TextView
-        android:id="@+id/tvCoinsDisplay"
+        android:id="@+id/tvCoins"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:text="0"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:text="Coins: 0"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp" />
 
-    <!-- Prestige info container -->
-    <LinearLayout
+    <TextView
+        android:id="@+id/tvPrestigePoints"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Prestige Points: 0"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/tvCoins"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp" />
+
+    <TextView
+        android:id="@+id/tvBonus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Bonus: +0.0%"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/tvPrestigePoints"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp" />
+
+    <Button
+        android:id="@+id/btnReset"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="16dp"
-        android:background="#EEEEEE">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="PRESTIGE"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:layout_marginBottom="16dp"/>
-
-        <TextView
-            android:id="@+id/tvPrestigePoints"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Current Prestige Points: 0"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:id="@+id/tvCurrentCoins"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Your Coins: 0"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:id="@+id/tvPotentialPrestige"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Potential Prestige Points: 0"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:id="@+id/tvPrestigeBonus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Current Bonus: +0.0% to all income"
-            android:textSize="18sp"
-            android:layout_marginBottom="16dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Prestige will reset all your upgrades and coins, but you'll get permanent prestige points!"
-            android:textSize="16sp"
-            android:gravity="center"
-            android:layout_marginBottom="16dp" />
-
-        <Button
-            android:id="@+id/btnReset"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Reset and Prestige"
-            android:enabled="false" />
-    </LinearLayout>
-</RelativeLayout>
+        android:text="Prestige (Reset)"
+        android:textColor="#FFFFFF"
+        android:background="@color/purple_500"
+        app:layout_constraintTop_toBottomOf="@id/tvBonus"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="32dp"
+        android:layout_marginHorizontal="16dp" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,86 +7,71 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import androidx.lifecycle.ViewModelProvider
+import com.example.coin_clicker.MainActivity
 
 class ShopFragment : Fragment() {
 
-    private lateinit var tvCurrentCoins: TextView
-    private lateinit var btnGet1K: Button
-    private lateinit var btnGet1M: Button
-    private lateinit var btnGet1B: Button
-    private lateinit var btnGet1T: Button
-    private lateinit var btnGet1Qa: Button
-    private lateinit var btnGet1Qi: Button
-
-    private lateinit var viewModel: GameViewModel
+    private lateinit var tvTotalCoins: TextView
+    private lateinit var btnAdd1K: Button
+    private lateinit var btnAdd1M: Button
+    private lateinit var btnAdd1B: Button
+    private lateinit var btnAdd1T: Button
+    private lateinit var btnAdd1Qa: Button
+    private lateinit var btnAdd1Qi: Button
+    private lateinit var mainActivity: MainActivity
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_shop, container, false)
 
-        // Initialize ViewModel
-        viewModel = ViewModelProvider(requireActivity())[GameViewModel::class.java]
+        mainActivity = requireActivity() as MainActivity
 
-        // Initialize views
-        tvCurrentCoins = view.findViewById(R.id.tvCurrentCoins)
-        btnGet1K = view.findViewById(R.id.btnGet1K)
-        btnGet1M = view.findViewById(R.id.btnGet1M)
-        btnGet1B = view.findViewById(R.id.btnGet1B)
-        btnGet1T = view.findViewById(R.id.btnGet1T)
-        btnGet1Qa = view.findViewById(R.id.btnGet1Qa)
-        btnGet1Qi = view.findViewById(R.id.btnGet1Qi)
+        tvTotalCoins = view.findViewById(R.id.tvTotalCoins)
+        btnAdd1K = view.findViewById(R.id.btnAdd1K)
+        btnAdd1M = view.findViewById(R.id.btnAdd1M)
+        btnAdd1B = view.findViewById(R.id.btnAdd1B)
+        btnAdd1T = view.findViewById(R.id.btnAdd1T)
+        btnAdd1Qa = view.findViewById(R.id.btnAdd1Qa)
+        btnAdd1Qi = view.findViewById(R.id.btnAdd1Qi)
 
-        // Update current coins display
-        updateCoinsDisplay()
+        updateTotalCoins()
 
-        // Set click listeners for all cheat buttons
-        setupCheatButtons()
+        btnAdd1K.setOnClickListener {
+            mainActivity.addCheatCoins(1_000)
+            updateTotalCoins()
+        }
+
+        btnAdd1M.setOnClickListener {
+            mainActivity.addCheatCoins(1_000_000)
+            updateTotalCoins()
+        }
+
+        btnAdd1B.setOnClickListener {
+            mainActivity.addCheatCoins(1_000_000_000)
+            updateTotalCoins()
+        }
+
+        btnAdd1T.setOnClickListener {
+            mainActivity.addCheatCoins(1_000_000_000_000)
+            updateTotalCoins()
+        }
+
+        btnAdd1Qa.setOnClickListener {
+            mainActivity.addCheatCoins(1_000_000_000_000_000)
+            updateTotalCoins()
+        }
+
+        btnAdd1Qi.setOnClickListener {
+            mainActivity.addCheatCoins(1_000_000_000_000_000_000)
+            updateTotalCoins()
+        }
 
         return view
     }
 
-    private fun setupCheatButtons() {
-        btnGet1K.setOnClickListener {
-            viewModel.addCoinsFromShop(1_000L) // 1K
-            updateCoinsDisplay()
-        }
-
-        btnGet1M.setOnClickListener {
-            viewModel.addCoinsFromShop(1_000_000L) // 1M
-            updateCoinsDisplay()
-        }
-
-        btnGet1B.setOnClickListener {
-            viewModel.addCoinsFromShop(1_000_000_000L) // 1B
-            updateCoinsDisplay()
-        }
-
-        btnGet1T.setOnClickListener {
-            viewModel.addCoinsFromShop(1_000_000_000_000L) // 1T
-            updateCoinsDisplay()
-        }
-
-        btnGet1Qa.setOnClickListener {
-            viewModel.addCoinsFromShop(1_000_000_000_000_000L) // 1Qa
-            updateCoinsDisplay()
-        }
-
-        btnGet1Qi.setOnClickListener {
-            viewModel.addCoinsFromShop(1_000_000_000_000_000_000L) // 1Qi - Be careful with Long max value
-            updateCoinsDisplay()
-        }
-    }
-
-    private fun updateCoinsDisplay() {
-        tvCurrentCoins.text = "Coins: ${viewModel.getFormattedCoins()}"
-    }
-
-    override fun onResume() {
-        super.onResume()
-        updateCoinsDisplay()
+    private fun updateTotalCoins() {
+        tvTotalCoins.text = "Coins: ${mainActivity.getFormattedCoins()}"
     }
 }
