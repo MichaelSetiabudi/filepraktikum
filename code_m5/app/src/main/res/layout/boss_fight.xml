@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".BossFightActivity">
 
-    <!-- Restart Button -->
     <Button
         android:id="@+id/btnRestart"
         android:layout_width="wrap_content"
@@ -19,7 +18,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Boss HP Display -->
     <TextView
         android:id="@+id/tvBossHP"
         android:layout_width="wrap_content"
@@ -32,7 +30,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnRestart" />
 
-    <!-- Troops Display -->
     <TextView
         android:id="@+id/tvTroops"
         android:layout_width="wrap_content"
@@ -45,8 +42,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvBossHP" />
 
-    <!-- Result Message (Will be shown dynamically) -->
-    <TextView
+   <TextView
         android:id="@+id/tvResult"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -59,7 +55,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvTroops" />
 
-    <!-- Continue Button (Will be shown on win) -->
     <Button
         android:id="@+id/btnContinue"
         android:layout_width="wrap_content"
