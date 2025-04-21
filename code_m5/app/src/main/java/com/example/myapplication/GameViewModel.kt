@@ -10,8 +10,6 @@ import kotlin.random.Random
 
 class GameViewModel : ViewModel() {
     private val round1MaxWave = 5
-    private val round2MaxWave = 7
-    private val round3MaxWave = 10
     private val _gameState = MutableLiveData<GameState>(GameState.PLAYING)
     val gameState: LiveData<GameState> = _gameState
 
@@ -34,7 +32,6 @@ class GameViewModel : ViewModel() {
     val bossHP: LiveData<Int> = _bossHP
 
     private val _cheatActive = MutableLiveData(false)
-    val cheatActive: LiveData<Boolean> = _cheatActive
 
     private var isGameRunning = false
 
@@ -154,31 +151,23 @@ class GameViewModel : ViewModel() {
     fun getMaxWavesForRound(): Int {
         return when (_currentRound.value) {
             1 -> round1MaxWave
-            2 -> round2MaxWave
-            3 -> round3MaxWave
-            else -> round1MaxWave
+            2 -> 7
+            3 -> 10
+            else -> 10
         }
     }
     private fun isRoundComplete(): Boolean {
         val currentWave = _currentWave.value ?: 0
         return when (_currentRound.value) {
             1 -> currentWave >= round1MaxWave
-            2 -> currentWave >= round2MaxWave
-            3 -> currentWave >= round3MaxWave
+            2 -> currentWave >= 7
+            3 -> currentWave >= 10
             else -> false
         }
     }
 
     fun updateTroopsAfterBossFight(remainingTroops: Int) {
         _troopsCount.value = remainingTroops
-    }
-
-    fun updateCurrentRound(newRound: Int) {
-        _currentRound.value = newRound
-    }
-
-    fun updateBossHP(newHP: Int) {
-        _bossHP.value = newHP
     }
 
     fun continueToNextRound(nextRound: Int) {
@@ -189,6 +178,13 @@ class GameViewModel : ViewModel() {
             3 -> 2000
             else -> 500
         }
+
+        val previousWavesTotal = when (nextRound) {
+            2 -> 5
+            3 -> 7
+            else -> 0
+        }
+        _currentWave.value = previousWavesTotal
 
         _gameState.value = GameState.PLAYING
         waveInProgress = false

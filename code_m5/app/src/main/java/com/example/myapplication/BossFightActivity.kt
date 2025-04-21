@@ -120,7 +120,6 @@ class BossFightActivity : AppCompatActivity() {
                 btnRestart.visibility = View.VISIBLE
             }
         } else {
-            // Player loses
             tvResult.text = "YOU LOSE!"
             tvResult.setTextColor(getColor(android.R.color.holo_red_dark))
             btnRestart.visibility = View.VISIBLE

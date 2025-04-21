@@ -1,242 +1,233 @@
-package com.example.myapplication
+    package com.example.myapplication
 
-import android.content.Intent
-import android.os.Bundle
-import android.view.Gravity
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.FrameLayout
-import android.widget.GridLayout
-import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
+    import android.content.Intent
+    import android.os.Bundle
+    import android.view.Gravity
+    import android.view.ViewGroup
+    import android.widget.Button
+    import android.widget.FrameLayout
+    import android.widget.GridLayout
+    import android.widget.TextView
+    import android.widget.Toast
+    import androidx.appcompat.app.AppCompatActivity
+    import androidx.lifecycle.ViewModelProvider
 
-class MainActivity : AppCompatActivity() {
+    class MainActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: GameViewModel
-    private lateinit var gameGrid: GridLayout
-    private lateinit var btnLeft: Button
-    private lateinit var btnRight: Button
-    private lateinit var btnCheat: Button
-    private lateinit var tvTroopsCount: TextView
-    private lateinit var tvRoundInfo: TextView
-    private lateinit var gridCells: Array<Array<FrameLayout?>>
+        private lateinit var viewModel: GameViewModel
+        private lateinit var gameGrid: GridLayout
+        private lateinit var btnLeft: Button
+        private lateinit var btnRight: Button
+        private lateinit var btnCheat: Button
+        private lateinit var tvTroopsCount: TextView
+        private lateinit var tvRoundInfo: TextView
+        private lateinit var gridCells: Array<Array<FrameLayout?>>
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            setContentView(R.layout.activity_main)
 
-        // Initialize ViewModel
-        viewModel = ViewModelProvider(this)[GameViewModel::class.java]
+            viewModel = ViewModelProvider(this)[GameViewModel::class.java]
 
-        // Initialize views
-        gameGrid = findViewById(R.id.gameGrid)
-        btnLeft = findViewById(R.id.btnLeft)
-        btnRight = findViewById(R.id.btnRight)
-        btnCheat = findViewById(R.id.btnCheat)
-        tvTroopsCount = findViewById(R.id.tvTroopsCount)
-        tvRoundInfo = findViewById(R.id.tvRoundInfo)
+            gameGrid = findViewById(R.id.gameGrid)
+            btnLeft = findViewById(R.id.btnLeft)
+            btnRight = findViewById(R.id.btnRight)
+            btnCheat = findViewById(R.id.btnCheat)
+            tvTroopsCount = findViewById(R.id.tvTroopsCount)
+            tvRoundInfo = findViewById(R.id.tvRoundInfo)
 
-        initGridCells()
+            initGridCells()
 
-        setupButtons()
+            setupButtons()
 
-        observeViewModel()
+            observeViewModel()
 
-        handleIncomingIntent(intent)
-    }
+            handleIncomingIntent(intent)
+        }
 
-    private fun initGridCells() {
-        gridCells = Array(7) { row ->
-            Array(2) { col ->
-                val index = row * 2 + col
-                if (index < gameGrid.childCount) {
-                    gameGrid.getChildAt(index) as? FrameLayout
+        private fun initGridCells() {
+            gridCells = Array(7) { row ->
+                Array(2) { col ->
+                    val index = row * 2 + col
+                    if (index < gameGrid.childCount) {
+                        gameGrid.getChildAt(index) as? FrameLayout
+                    } else {
+                        null
+                    }
+                }
+            }
+        }
+
+        private fun setupButtons() {
+            btnLeft.setOnClickListener {
+                viewModel.moveLeft()
+            }
+
+            btnRight.setOnClickListener {
+                viewModel.moveRight()
+            }
+
+            btnCheat.setOnClickListener {
+                //untuk debug cheat
+                Toast.makeText(this, "Cheat button clicked!", Toast.LENGTH_SHORT).show()
+                viewModel.toggleCheat()
+            }
+        }
+
+        private fun observeViewModel() {
+            viewModel.playerPosition.observe(this) { position ->
+                updatePlayerPosition(position)
+            }
+
+            viewModel.troopsCount.observe(this) { troops ->
+                tvTroopsCount.text = "Troops: $troops"
+                updatePlayerTroops(troops)
+            }
+            viewModel.gateGrid.observe(this) { grid ->
+                updateGateDisplay(grid)
+            }
+
+            viewModel.gameState.observe(this) { state ->
+                if (state == GameState.BOSS_FIGHT) {
+                    navigateToBossFight()
+                }
+            }
+
+            viewModel.currentWave.observe(this) { wave ->
+                updateRoundInfo()
+            }
+            viewModel.currentRound.observe(this) { round ->
+                updateRoundInfo()
+            }
+        }
+
+        private fun updateRoundInfo() {
+            val round = viewModel.currentRound.value ?: 1
+            val wave = viewModel.currentWave.value ?: 0
+            val maxWaves = viewModel.getMaxWavesForRound()
+            tvRoundInfo.text = "Round $round - Wave $wave/$maxWaves"
+        }
+
+        private fun updatePlayerPosition(position: Int) {
+            clearCell(6, 0)
+            clearCell(6, 1)
+
+            updatePlayerTroops(viewModel.troopsCount.value ?: 10, position)
+        }
+
+        private fun updatePlayerTroops(troops: Int, position: Int = viewModel.playerPosition.value ?: 0) {
+            val cell = gridCells[6][position]
+            cell?.let {
+                it.setBackgroundColor(getColor(android.R.color.darker_gray))
+
+                val textView = findOrCreateTextView(it, "playerText")
+                textView.text = troops.toString()
+                textView.textSize = 24f
+                textView.setTextColor(getColor(android.R.color.black))
+            }
+        }
+
+        private fun updateGateDisplay(grid: Array<Array<Gate?>>) {
+            for (row in 0 until 6) {
+                for (col in 0 until 2) {
+                    clearCell(row, col)
+                }
+            }
+
+            for (row in 0 until 6) {
+                for (col in 0 until 2) {
+                    val gate = grid[row][col]
+                    if (gate != null) {
+                        displayGate(row, col, gate)
+                    }
+                }
+            }
+        }
+
+        private fun displayGate(row: Int, col: Int, gate: Gate) {
+            val cell = gridCells[row][col]
+            cell?.let {
+                val textView = findOrCreateTextView(it, "gateText")
+
+                val text = when (gate.operator) {
+                    "+" -> "+${gate.value}"
+                    "-" -> "-${gate.value}"
+                    "×" -> "×${gate.value}"
+                    "÷" -> "÷${gate.value}"
+                    else -> gate.value.toString()
+                }
+
+                textView.text = text
+                textView.textSize = 24f
+
+                val color = when (gate.operator) {
+                    "+" -> getColor(android.R.color.holo_green_dark)
+                    "-" -> getColor(android.R.color.holo_red_dark)
+                    "×" -> getColor(android.R.color.holo_orange_dark)
+                    "÷" -> getColor(android.R.color.holo_blue_dark)
+                    else -> getColor(android.R.color.black)
+                }
+                textView.setTextColor(color)
+            }
+        }
+
+        private fun findOrCreateTextView(parent: FrameLayout, tag: String): TextView {
+            return parent.findViewWithTag(tag) as? TextView ?: TextView(this).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+                gravity = Gravity.CENTER
+                this.tag = tag
+                parent.addView(this)
+            }
+        }
+
+        private fun clearCell(row: Int, col: Int) {
+            gridCells[row][col]?.removeAllViews()
+
+            if (row != 6) {
+                gridCells[row][col]?.setBackgroundColor(getColor(android.R.color.white))
+            }
+        }
+
+        private fun navigateToBossFight() {
+            val intent = Intent(this, BossFightActivity::class.java).apply {
+                putExtra("TROOPS_COUNT", viewModel.troopsCount.value ?: 0)
+                putExtra("BOSS_HP", viewModel.bossHP.value ?: 500)
+                putExtra("CURRENT_ROUND", viewModel.currentRound.value ?: 1)
+            }
+            startActivity(intent)
+        }
+
+        private fun handleIncomingIntent(intent: Intent?) {
+            if (intent == null) return
+
+            val continueGame = intent.getBooleanExtra("CONTINUE_GAME", false)
+            if (continueGame) {
+                val remainingTroops = intent.getIntExtra("REMAINING_TROOPS", 10)
+
+                val currentRound = intent.getIntExtra("CURRENT_ROUND", 1)
+
+                viewModel.updateTroopsAfterBossFight(remainingTroops)
+
+                if (currentRound < 3) {
+                    val nextRound = currentRound + 1
+                    viewModel.continueToNextRound(nextRound)
                 } else {
-                    null
+                    viewModel.resetGame()
                 }
-            }
-        }
-    }
 
-    private fun setupButtons() {
-        btnLeft.setOnClickListener {
-            viewModel.moveLeft()
-        }
-
-        btnRight.setOnClickListener {
-            viewModel.moveRight()
-        }
-
-        btnCheat.setOnClickListener {
-            //untuk debug cheat
-            Toast.makeText(this, "Cheat button clicked!", Toast.LENGTH_SHORT).show()
-            viewModel.toggleCheat()
-        }
-    }
-
-    private fun observeViewModel() {
-        viewModel.playerPosition.observe(this) { position ->
-            updatePlayerPosition(position)
-        }
-
-        viewModel.troopsCount.observe(this) { troops ->
-            tvTroopsCount.text = "Troops: $troops"
-            updatePlayerTroops(troops)
-        }
-        viewModel.gateGrid.observe(this) { grid ->
-            updateGateDisplay(grid)
-        }
-
-        viewModel.gameState.observe(this) { state ->
-            if (state == GameState.BOSS_FIGHT) {
-                navigateToBossFight()
-            }
-        }
-
-        viewModel.currentWave.observe(this) { wave ->
-            updateRoundInfo()
-        }
-        viewModel.currentRound.observe(this) { round ->
-            updateRoundInfo()
-        }
-    }
-
-    private fun updateRoundInfo() {
-        val round = viewModel.currentRound.value ?: 1
-        val wave = viewModel.currentWave.value ?: 0
-        val maxWaves = viewModel.getMaxWavesForRound()
-        tvRoundInfo.text = "Round $round - Wave $wave/$maxWaves"
-    }
-
-    private fun updatePlayerPosition(position: Int) {
-        clearCell(6, 0)
-        clearCell(6, 1)
-
-        updatePlayerTroops(viewModel.troopsCount.value ?: 10, position)
-    }
-
-    private fun updatePlayerTroops(troops: Int, position: Int = viewModel.playerPosition.value ?: 0) {
-        val cell = gridCells[6][position]
-        cell?.let {
-            it.setBackgroundColor(getColor(android.R.color.darker_gray))
-
-            val textView = findOrCreateTextView(it, "playerText")
-            textView.text = troops.toString()
-            textView.textSize = 24f
-            textView.setTextColor(getColor(android.R.color.black))
-        }
-    }
-
-    private fun updateGateDisplay(grid: Array<Array<Gate?>>) {
-        for (row in 0 until 6) {
-            for (col in 0 until 2) {
-                clearCell(row, col)
-            }
-        }
-
-        for (row in 0 until 6) {
-            for (col in 0 until 2) {
-                val gate = grid[row][col]
-                if (gate != null) {
-                    displayGate(row, col, gate)
-                }
-            }
-        }
-    }
-
-    private fun displayGate(row: Int, col: Int, gate: Gate) {
-        val cell = gridCells[row][col]
-        cell?.let {
-            val textView = findOrCreateTextView(it, "gateText")
-
-            val text = when (gate.operator) {
-                "+" -> "+${gate.value}"
-                "-" -> "-${gate.value}"
-                "×" -> "×${gate.value}"
-                "÷" -> "÷${gate.value}"
-                else -> gate.value.toString()
-            }
-
-            textView.text = text
-            textView.textSize = 24f
-
-            val color = when (gate.operator) {
-                "+" -> getColor(android.R.color.holo_green_dark)
-                "-" -> getColor(android.R.color.holo_red_dark)
-                "×" -> getColor(android.R.color.holo_orange_dark)
-                "÷" -> getColor(android.R.color.holo_blue_dark)
-                else -> getColor(android.R.color.black)
-            }
-            textView.setTextColor(color)
-        }
-    }
-
-    private fun findOrCreateTextView(parent: FrameLayout, tag: String): TextView {
-        return parent.findViewWithTag(tag) as? TextView ?: TextView(this).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-            gravity = Gravity.CENTER
-            this.tag = tag
-            parent.addView(this)
-        }
-    }
-
-    private fun clearCell(row: Int, col: Int) {
-        gridCells[row][col]?.removeAllViews()
-
-        if (row != 6) {
-            gridCells[row][col]?.setBackgroundColor(getColor(android.R.color.white))
-        }
-    }
-
-    private fun navigateToBossFight() {
-        val intent = Intent(this, BossFightActivity::class.java).apply {
-            putExtra("TROOPS_COUNT", viewModel.troopsCount.value ?: 0)
-            putExtra("BOSS_HP", viewModel.bossHP.value ?: 500)
-            putExtra("CURRENT_ROUND", viewModel.currentRound.value ?: 1)
-        }
-        startActivity(intent)
-    }
-
-    private fun handleIncomingIntent(intent: Intent?) {
-        if (intent == null) return
-
-        val continueGame = intent.getBooleanExtra("CONTINUE_GAME", false)
-        if (continueGame) {
-            // Get remaining troops after boss fight
-            val remainingTroops = intent.getIntExtra("REMAINING_TROOPS", 10)
-
-            // Get the current round from the intent
-            val currentRound = intent.getIntExtra("CURRENT_ROUND", 1)
-
-            // Update troops in the ViewModel
-            viewModel.updateTroopsAfterBossFight(remainingTroops)
-
-            if (currentRound < 3) {
-                // Move to next round (either round 2 or round 3)
-                val nextRound = currentRound + 1
-                viewModel.continueToNextRound(nextRound)
+                intent.removeExtra("CONTINUE_GAME")
+                intent.removeExtra("REMAINING_TROOPS")
             } else {
-                // Player has completed all 3 rounds
-                viewModel.resetGame()
+                viewModel.startGame()
             }
+        }
 
-            // Clear the extras to prevent reuse
-            intent.removeExtra("CONTINUE_GAME")
-            intent.removeExtra("REMAINING_TROOPS")
-        } else {
-            // Start new game if not continuing
-            viewModel.startGame()
+        override fun onNewIntent(intent: Intent) {
+            super.onNewIntent(intent)
+            setIntent(intent)
+            handleIncomingIntent(intent)
         }
     }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        setIntent(intent)
-        handleIncomingIntent(intent)
-    }
-}
