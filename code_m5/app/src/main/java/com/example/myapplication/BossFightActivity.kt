@@ -72,11 +72,17 @@ class BossFightActivity : AppCompatActivity() {
                 val progress = 1 - (millisUntilFinished / 5000.0)
 
                 if (troopsCount > bossHP) {
-                    countdownBossHP = (bossHP - progress * bossHP).toInt().coerceAtLeast(0)
-                    countdownTroops = (troopsCount - progress * bossHP).toInt().coerceAtLeast(1)
+                    countdownBossHP = (bossHP - progress * bossHP).toInt()
+                    if (countdownBossHP < 0) countdownBossHP = 0
+
+                    countdownTroops = (troopsCount - progress * bossHP).toInt()
+                    if (countdownTroops < 1) countdownTroops = 1
                 } else {
-                    countdownTroops = (troopsCount - progress * troopsCount).toInt().coerceAtLeast(0)
-                    countdownBossHP = (bossHP - progress * troopsCount).toInt().coerceAtLeast(0)
+                    countdownTroops = (troopsCount - progress * troopsCount).toInt()
+                    if (countdownTroops < 0) countdownTroops = 0
+
+                    countdownBossHP = (bossHP - progress * troopsCount).toInt()
+                    if (countdownBossHP < 0) countdownBossHP = 0
                 }
 
                 tvBossHP.text = "Boss HP: $countdownBossHP"

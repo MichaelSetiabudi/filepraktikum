@@ -9,68 +9,67 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 class GameViewModel : ViewModel() {
-    private val round1MaxWave = 5
-    private val _gameState = MutableLiveData<GameState>(GameState.PLAYING)
-    val gameState: LiveData<GameState> = _gameState
+    private val maxWaveRound1 = 5
+    private val _gameState = MutableLiveData<String>(GameState.PLAYING)
+    val gameState: LiveData<String> = _gameState
 
-    private val _troopsCount = MutableLiveData(10)
-    val troopsCount: LiveData<Int> = _troopsCount
+    private val _troops = MutableLiveData(10)
+    val troops: LiveData<Int> = _troops
 
-    private val _playerPosition = MutableLiveData(0)
-    val playerPosition: LiveData<Int> = _playerPosition
+    private val _playerPos = MutableLiveData(0)
+    val playerPos: LiveData<Int> = _playerPos
 
-    private val _gateGrid = MutableLiveData<Array<Array<Gate?>>>(Array(7) { Array(2) { null } })
-    val gateGrid: LiveData<Array<Array<Gate?>>> = _gateGrid
+    private val _gates = MutableLiveData<Array<Array<Gate?>>>(Array(7) { Array(2) { null } })
+    val gates: LiveData<Array<Array<Gate?>>> = _gates
 
-    private val _currentRound = MutableLiveData(1)
-    val currentRound: LiveData<Int> = _currentRound
+    private val _round = MutableLiveData(1)
+    val round: LiveData<Int> = _round
 
-    private val _currentWave = MutableLiveData(0)
-    val currentWave: LiveData<Int> = _currentWave
+    private val _wave = MutableLiveData(0)
+    val wave: LiveData<Int> = _wave
 
-    private val _bossHP = MutableLiveData(500)
-    val bossHP: LiveData<Int> = _bossHP
+    private val _bossHealth = MutableLiveData(500)
+    val bossHealth: LiveData<Int> = _bossHealth
 
-    private val _cheatActive = MutableLiveData(false)
+    private val _cheatMode = MutableLiveData(false)
 
-    private var isGameRunning = false
-
-    private var waveInProgress = false
+    private var isRunning = false
+    private var waveActive = false
 
     fun startGame() {
-        _troopsCount.value = 10
-        _playerPosition.value = 0
-        _currentWave.value = 0
-        _currentRound.value = 1
-        _bossHP.value = 500
-        _cheatActive.value = false
-        waveInProgress = false
+        _troops.value = 10
+        _playerPos.value = 0
+        _wave.value = 0
+        _round.value = 1
+        _bossHealth.value = 500
+        _cheatMode.value = false
+        waveActive = false
 
-        _gateGrid.value = Array(7) { Array(2) { null } }
+        _gates.value = Array(7) { Array(2) { null } }
 
-        isGameRunning = true
+        isRunning = true
         startGameLoop()
     }
 
     fun moveLeft() {
-        if (_playerPosition.value == 1) {
-            _playerPosition.value = 0
+        if (_playerPos.value == 1) {
+            _playerPos.value = 0
         }
     }
 
     fun moveRight() {
-        if (_playerPosition.value == 0) {
-            _playerPosition.value = 1
+        if (_playerPos.value == 0) {
+            _playerPos.value = 1
         }
     }
 
     fun toggleCheat() {
-        _cheatActive.value = !(_cheatActive.value ?: false)
+        _cheatMode.value = !(_cheatMode.value ?: false)
     }
 
     private fun generateGate(): Gate {
         val value = Random.nextInt(1, 31)
-        val operators = if (_cheatActive.value == true) {
+        val operators = if (_cheatMode.value == true) {
             listOf("+", "×")
         } else {
             listOf("+", "-", "×", "÷")
@@ -82,8 +81,8 @@ class GameViewModel : ViewModel() {
 
     private fun startGameLoop() {
         viewModelScope.launch {
-            while (isGameRunning) {
-                if (!waveInProgress && !isRoundComplete()) {
+            while (isRunning) {
+                if (!waveActive && !isRoundComplete()) {
                     startNewWave()
                 }
 
@@ -94,85 +93,87 @@ class GameViewModel : ViewModel() {
 
     private fun startNewWave() {
         viewModelScope.launch {
-            waveInProgress = true
+            waveActive = true
 
-            _currentWave.value = (_currentWave.value ?: 0) + 1
+            _wave.value = (_wave.value ?: 0) + 1
 
-            _gateGrid.value = Array(7) { Array(2) { null } }
+            _gates.value = Array(7) { Array(2) { null } }
 
             val grid = Array(7) { Array<Gate?>(2) { null } }
             grid[0][0] = generateGate().copy(column = 0)
             grid[0][1] = generateGate().copy(column = 1)
-            _gateGrid.value = grid
+            _gates.value = grid
 
             for (row in 0 until 6) {
                 delay(700)
 
                 val updatedGrid = Array(7) { Array<Gate?>(2) { null } }
-                updatedGrid[row + 1][0] = _gateGrid.value?.get(row)?.get(0)
-                updatedGrid[row + 1][1] = _gateGrid.value?.get(row)?.get(1)
-                _gateGrid.value = updatedGrid
+                updatedGrid[row + 1][0] = _gates.value?.get(row)?.get(0)
+                updatedGrid[row + 1][1] = _gates.value?.get(row)?.get(1)
+                _gates.value = updatedGrid
             }
 
             checkPlayerCollision()
 
-            _gateGrid.value = Array(7) { Array(2) { null } }
-            waveInProgress = false
+            _gates.value = Array(7) { Array(2) { null } }
+            waveActive = false
 
             if (isRoundComplete()) {
-                isGameRunning = false
+                isRunning = false
                 _gameState.value = GameState.BOSS_FIGHT
             }
         }
     }
 
     private fun checkPlayerCollision() {
-        val grid = _gateGrid.value ?: return
-        val playerPos = _playerPosition.value ?: 0
+        val grid = _gates.value ?: return
+        val pos = _playerPos.value ?: 0
 
-        val gate = grid[6][playerPos]
+        val gate = grid[6][pos]
         if (gate != null) {
             processTroopChange(gate)
         }
     }
 
     private fun processTroopChange(gate: Gate) {
-        val currentTroops = _troopsCount.value ?: 10
-        val gateValue = gate.value
+        val current = _troops.value ?: 10
+        val value = gate.value
 
-        _troopsCount.value = when (gate.operator) {
-            "+" -> currentTroops + gateValue
-            "-" -> maxOf(1, currentTroops - gateValue)
-            "×" -> currentTroops * gateValue
-            "÷" -> maxOf(1, currentTroops / gateValue)
-            else -> currentTroops
+        _troops.value = when (gate.operator) {
+            "+" -> current + value
+            "-" -> maxOf(1, current - value)
+            "×" -> current * value
+            "÷" -> maxOf(1, current / value)
+            else -> current
         }
     }
+
     fun getMaxWavesForRound(): Int {
-        return when (_currentRound.value) {
-            1 -> round1MaxWave
+        return when (_round.value) {
+            1 -> maxWaveRound1
             2 -> 7
             3 -> 10
             else -> 10
         }
     }
+
     private fun isRoundComplete(): Boolean {
-        val currentWave = _currentWave.value ?: 0
-        return when (_currentRound.value) {
-            1 -> currentWave >= round1MaxWave
+        val currentWave = _wave.value ?: 0
+        return when (_round.value) {
+            1 -> currentWave >= maxWaveRound1
             2 -> currentWave >= 7
             3 -> currentWave >= 10
             else -> false
         }
     }
 
-    fun updateTroopsAfterBossFight(remainingTroops: Int) {
-        _troopsCount.value = remainingTroops
+    fun updateTroopsAfterBossFight(remaining: Int) {
+        _troops.value = remaining
     }
 
     fun continueToNextRound(nextRound: Int) {
-        _currentRound.value = nextRound
-        _bossHP.value = when (nextRound) {
+        _round.value = nextRound
+        _bossHealth.value = when (nextRound) {
             1 -> 500
             2 -> 1000
             3 -> 2000
@@ -184,23 +185,23 @@ class GameViewModel : ViewModel() {
             3 -> 7
             else -> 0
         }
-        _currentWave.value = previousWavesTotal
+        _wave.value = previousWavesTotal
 
         _gameState.value = GameState.PLAYING
-        waveInProgress = false
-        isGameRunning = true
+        waveActive = false
+        isRunning = true
 
         startGameLoop()
     }
 
     fun resetGame() {
-        isGameRunning = false
+        isRunning = false
         startGame()
         _gameState.value = GameState.PLAYING
     }
 
     override fun onCleared() {
         super.onCleared()
-        isGameRunning = false
+        isRunning = false
     }
 }

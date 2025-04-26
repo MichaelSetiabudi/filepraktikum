@@ -1,6 +1,8 @@
 package com.example.myapplication
 
-enum class GameState {
-    PLAYING,
-    BOSS_FIGHT,
+class GameState {
+    companion object {
+        const val PLAYING = "PLAYING"
+        const val BOSS_FIGHT = "BOSS_FIGHT"
+    }
 }
