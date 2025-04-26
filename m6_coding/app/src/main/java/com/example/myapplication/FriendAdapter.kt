@@ -1,14 +1,17 @@
 package com.example.myapplication
 
-import android.content.Intent
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.example.myapplication.R
 
-class FriendAdapter(private val context: HomeActivity) : RecyclerView.Adapter<FriendAdapter.ViewHolder>() {
+class FriendAdapter(private val fragment: Fragment) : RecyclerView.Adapter<FriendAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val ivProfile: ImageView = view.findViewById(R.id.ivProfile)
@@ -63,10 +66,12 @@ class FriendAdapter(private val context: HomeActivity) : RecyclerView.Adapter<Fr
         }
 
         holder.itemView.setOnClickListener {
-            val intent = Intent(context, ChatRoomActivity::class.java)
-            intent.putExtra("friendPhone", friendPhone)
-            intent.putExtra("friendName", friendName)
-            context.startActivity(intent)
+            // Using Navigation Component instead of Intent
+            val bundle = androidx.core.os.bundleOf(
+                "friendPhone" to friendPhone,
+                "friendName" to friendName
+            )
+            fragment.findNavController().navigate(R.id.action_homeFragment_to_chatRoomFragment, bundle)
         }
     }
 }
