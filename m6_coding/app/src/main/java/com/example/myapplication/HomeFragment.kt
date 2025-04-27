@@ -8,6 +8,8 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,6 +20,9 @@ class HomeFragment : Fragment() {
     private lateinit var btnAddFriend: ImageView
     private lateinit var rvFriends: RecyclerView
     private lateinit var adapter: FriendAdapter
+
+    // Initialize the ViewModel using the by viewModels() delegate
+    private val chatViewModel: ChatViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,7 +42,9 @@ class HomeFragment : Fragment() {
         tvUserInfo.text = "${UserData.currentUserName}\n(${UserData.currentUserPhone})"
 
         rvFriends.layoutManager = LinearLayoutManager(requireContext())
-        adapter = FriendAdapter(this)  // Pass the fragment instead of context
+
+        // Pass the ViewModel to the adapter
+        adapter = FriendAdapter(this, chatViewModel)
         rvFriends.adapter = adapter
 
         btnLogout.setOnClickListener {
@@ -49,10 +56,13 @@ class HomeFragment : Fragment() {
         btnAddFriend.setOnClickListener {
             findNavController().navigate(R.id.action_homeFragment_to_addFriendFragment)
         }
+
+        // No need for explicit adapter.notifyDataSetChanged() since LiveData will trigger updates
     }
 
-    override fun onResume() {
-        super.onResume()
-        adapter.notifyDataSetChanged()
-    }
+    // We don't need this override anymore as the LiveData in ViewModel handles updates
+    // override fun onResume() {
+    //     super.onResume()
+    //     adapter.notifyDataSetChanged()
+    // }
 }

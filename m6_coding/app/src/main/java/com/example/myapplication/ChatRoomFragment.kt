@@ -7,7 +7,11 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,9 +27,15 @@ class ChatRoomFragment : Fragment() {
     private lateinit var btnSend: Button
     private lateinit var adapter: MessageAdapter
 
+    private val chatViewModel: ChatViewModel by viewModels()
+
     private var friendPhone = ""
     private var friendName = ""
     private var chatKey = ""
+
+    // For editing messages
+    private var isEditing = false
+    private var editingMessagePosition = -1
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,10 +58,6 @@ class ChatRoomFragment : Fragment() {
             "$friendPhone-${UserData.currentUserPhone}"
         }
 
-        if (!UserData.messages.containsKey(chatKey)) {
-            UserData.messages[chatKey] = mutableListOf()
-        }
-
         // Initialize views
         btnBack = view.findViewById(R.id.btnBack)
         tvChatHeader = view.findViewById(R.id.tvChatHeader)
@@ -64,21 +70,47 @@ class ChatRoomFragment : Fragment() {
         // Set up the RecyclerView
         rvMessages.layoutManager = LinearLayoutManager(requireContext())
         adapter = MessageAdapter(
-            chatKey,
             UserData.currentUserPhone,
             UserData.currentUserName,
-            friendName
+            onMessageDoubleClick = { message, position ->
+                // Handle double click to edit message
+                if (!message.isUnsent) {
+                    startEditingMessage(message, position)
+                }
+            },
+            onMessageLongClick = { message, position ->
+                // Handle long press to unsend message
+                if (message.sender == UserData.currentUserPhone && !message.isUnsent) {
+                    showUnsendConfirmationDialog(position)
+                    true
+                } else {
+                    false
+                }
+            }
         )
         rvMessages.adapter = adapter
 
-        // Scroll to the last message if there are any
-        if ((UserData.messages[chatKey]?.size ?: 0) > 0) {
-            rvMessages.scrollToPosition(UserData.messages[chatKey]?.size?.minus(1) ?: 0)
-        }
+        // Observe the chat messages
+        chatViewModel.loadChatMessages(chatKey)
+        chatViewModel.chatMessages.observe(viewLifecycleOwner, Observer { messages ->
+            adapter.updateMessages(messages)
+
+            // Scroll to the last message if there are any
+            if (messages.isNotEmpty()) {
+                rvMessages.scrollToPosition(messages.size - 1)
+            }
+
+            // Mark received messages as read
+            chatViewModel.markMessagesAsRead(chatKey, UserData.currentUserPhone)
+        })
 
         // Set button click listeners
         btnSend.setOnClickListener {
-            sendMessage()
+            if (isEditing) {
+                updateMessage()
+            } else {
+                sendMessage()
+            }
         }
 
         btnBack.setOnClickListener {
@@ -97,18 +129,57 @@ class ChatRoomFragment : Fragment() {
         val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
         val timestamp = timeFormat.format(Date())
 
-        val message = Message(
+        chatViewModel.sendMessage(
+            chatKey,
             UserData.currentUserPhone,
             friendPhone,
             content,
             timestamp
         )
 
-        UserData.messages[chatKey]?.add(message)
-
-        adapter.notifyDataSetChanged()
-        rvMessages.scrollToPosition(UserData.messages[chatKey]?.size?.minus(1) ?: 0)
-
         etMessage.setText("")
+    }
+
+    private fun startEditingMessage(message: Message, position: Int) {
+        // Only allow editing your own messages
+        if (message.sender != UserData.currentUserPhone) return
+
+        isEditing = true
+        editingMessagePosition = position
+
+        // Change button text to indicate editing mode
+        btnSend.text = "Update"
+
+        // Fill the edit text with the message content
+        etMessage.setText(message.content)
+        etMessage.setSelection(message.content.length)  // Put cursor at end
+        etMessage.requestFocus()
+    }
+
+    private fun updateMessage() {
+        val newContent = etMessage.text.toString().trim()
+
+        if (newContent.isEmpty() || editingMessagePosition == -1) {
+            return
+        }   
+        chatViewModel.editMessage(chatKey, editingMessagePosition, newContent)
+        isEditing = false
+        editingMessagePosition = -1
+        btnSend.text = "Send"
+        etMessage.setText("")
+    }
+
+    private fun showUnsendConfirmationDialog(messagePosition: Int) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Unsend Message")
+            .setMessage("Are you sure you want to unsend this message?")
+            .setPositiveButton("Unsend") { dialog, _ ->
+                chatViewModel.unsendMessage(chatKey, messagePosition, UserData.currentUserName)
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 }

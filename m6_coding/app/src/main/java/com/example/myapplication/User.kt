@@ -44,4 +44,12 @@ class UserData {
     }
 }
 
-class Message(val sender: String, val receiver: String, val content: String, val timestamp: String)
+data class Message(
+    val sender: String,
+    val receiver: String,
+    var content: String,
+    val timestamp: String,
+    var isRead: Boolean = false,
+    var isEdited: Boolean = false,
+    var isUnsent: Boolean = false
+)
