@@ -10,13 +10,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Setup Navigation
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
-
-        // Remove the ActionBar setup
-        // NavigationUI.setupActionBarWithNavController(this, navController)
+        UserData.initialize(applicationContext)
     }
 
     override fun onSupportNavigateUp(): Boolean {

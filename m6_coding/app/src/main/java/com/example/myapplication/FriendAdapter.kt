@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 
@@ -17,11 +16,12 @@ class FriendAdapter(
 ) : RecyclerView.Adapter<FriendAdapter.ViewHolder>() {
 
     private var chats: Map<String, List<Message>> = mapOf()
+    private var friendsList: List<String> = listOf()
 
     init {
-        // Observe chat updates
         viewModel.allChats.observe(fragment.viewLifecycleOwner) { updatedChats ->
             chats = updatedChats
+            friendsList = UserData.friends.toList()
             notifyDataSetChanged()
         }
     }
@@ -31,7 +31,7 @@ class FriendAdapter(
         val tvName: TextView = view.findViewById(R.id.tvName)
         val tvLastMessage: TextView = view.findViewById(R.id.tvLastMessage)
         val tvTimestamp: TextView = view.findViewById(R.id.tvTimestamp)
-        val ivUnreadIndicator: ImageView = view.findViewById(R.id.ivUnreadIndicator) // Add this to your item_friend.xml
+        val ivUnreadIndicator: ImageView = view.findViewById(R.id.ivUnreadIndicator)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -40,16 +40,16 @@ class FriendAdapter(
     }
 
     override fun getItemCount(): Int {
-        return UserData.friends.size
+        return friendsList.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val friendPhone = UserData.friends[position]
+        val friendPhone = friendsList[position]
 
-        var friendName = ""
-        for (i in 0 until UserData.users.size) {
-            if (UserData.users[i].phone == friendPhone) {
-                friendName = UserData.users[i].name
+        var friendName = "Unknown"
+        for (user in UserData.users) {
+            if (user.phone == friendPhone) {
+                friendName = user.name
                 break
             }
         }
@@ -66,24 +66,33 @@ class FriendAdapter(
 
         if (messages == null || messages.isEmpty()) {
             holder.tvLastMessage.text = "No messages yet"
-            holder.tvLastMessage.setTypeface(null, Typeface.BOLD_ITALIC)
+            holder.tvLastMessage.setTypeface(null, Typeface.ITALIC)
             holder.tvTimestamp.text = ""
             holder.ivUnreadIndicator.visibility = View.GONE
         } else {
             val lastMsg = messages.last()
-            holder.tvLastMessage.text = lastMsg.content
+
+            if (lastMsg.isUnsent) {
+                holder.tvLastMessage.text = lastMsg.content
+                holder.tvLastMessage.setTypeface(null, Typeface.ITALIC)
+            } else {
+                val prefix = if (lastMsg.sender == UserData.currentUserPhone) "You: " else ""
+                holder.tvLastMessage.text = prefix + lastMsg.content
+            }
+
             holder.tvTimestamp.text = lastMsg.timestamp
 
-            // Check if there are unread messages
             val hasUnreadMessages = messages.any {
                 it.sender == friendPhone && !it.isRead
             }
 
             if (hasUnreadMessages) {
-                holder.tvLastMessage.setTypeface(null, Typeface.BOLD) // Bold
+                holder.tvLastMessage.setTypeface(holder.tvLastMessage.typeface, Typeface.BOLD)
                 holder.ivUnreadIndicator.visibility = View.VISIBLE
             } else {
-                holder.tvLastMessage.setTypeface(null, Typeface.NORMAL) // Normal
+                if (!lastMsg.isUnsent) {
+                    holder.tvLastMessage.setTypeface(null, Typeface.NORMAL)
+                }
                 holder.ivUnreadIndicator.visibility = View.GONE
             }
         }

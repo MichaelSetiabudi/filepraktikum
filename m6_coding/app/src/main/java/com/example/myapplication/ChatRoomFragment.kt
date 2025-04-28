@@ -33,7 +33,6 @@ class ChatRoomFragment : Fragment() {
     private var friendName = ""
     private var chatKey = ""
 
-    // For editing messages
     private var isEditing = false
     private var editingMessagePosition = -1
 
@@ -48,7 +47,6 @@ class ChatRoomFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Get arguments passed from FriendAdapter
         friendPhone = arguments?.getString("friendPhone") ?: ""
         friendName = arguments?.getString("friendName") ?: ""
 
@@ -58,7 +56,6 @@ class ChatRoomFragment : Fragment() {
             "$friendPhone-${UserData.currentUserPhone}"
         }
 
-        // Initialize views
         btnBack = view.findViewById(R.id.btnBack)
         tvChatHeader = view.findViewById(R.id.tvChatHeader)
         rvMessages = view.findViewById(R.id.rvMessages)
@@ -67,19 +64,16 @@ class ChatRoomFragment : Fragment() {
 
         tvChatHeader.text = friendName
 
-        // Set up the RecyclerView
         rvMessages.layoutManager = LinearLayoutManager(requireContext())
         adapter = MessageAdapter(
             UserData.currentUserPhone,
             UserData.currentUserName,
             onMessageDoubleClick = { message, position ->
-                // Handle double click to edit message
                 if (!message.isUnsent) {
                     startEditingMessage(message, position)
                 }
             },
             onMessageLongClick = { message, position ->
-                // Handle long press to unsend message
                 if (message.sender == UserData.currentUserPhone && !message.isUnsent) {
                     showUnsendConfirmationDialog(position)
                     true
@@ -90,21 +84,16 @@ class ChatRoomFragment : Fragment() {
         )
         rvMessages.adapter = adapter
 
-        // Observe the chat messages
         chatViewModel.loadChatMessages(chatKey)
         chatViewModel.chatMessages.observe(viewLifecycleOwner, Observer { messages ->
             adapter.updateMessages(messages)
 
-            // Scroll to the last message if there are any
             if (messages.isNotEmpty()) {
                 rvMessages.scrollToPosition(messages.size - 1)
             }
 
-            // Mark received messages as read
             chatViewModel.markMessagesAsRead(chatKey, UserData.currentUserPhone)
         })
-
-        // Set button click listeners
         btnSend.setOnClickListener {
             if (isEditing) {
                 updateMessage()
@@ -114,7 +103,6 @@ class ChatRoomFragment : Fragment() {
         }
 
         btnBack.setOnClickListener {
-            // Navigate back to HomeFragment
             findNavController().navigateUp()
         }
     }
@@ -141,18 +129,15 @@ class ChatRoomFragment : Fragment() {
     }
 
     private fun startEditingMessage(message: Message, position: Int) {
-        // Only allow editing your own messages
         if (message.sender != UserData.currentUserPhone) return
 
         isEditing = true
         editingMessagePosition = position
 
-        // Change button text to indicate editing mode
         btnSend.text = "Update"
 
-        // Fill the edit text with the message content
         etMessage.setText(message.content)
-        etMessage.setSelection(message.content.length)  // Put cursor at end
+        etMessage.setSelection(message.content.length)
         etMessage.requestFocus()
     }
 

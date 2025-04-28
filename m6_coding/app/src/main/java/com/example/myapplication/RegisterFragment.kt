@@ -8,7 +8,11 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class RegisterFragment : Fragment() {
 
@@ -18,19 +22,20 @@ class RegisterFragment : Fragment() {
     private lateinit var etConfirmPassword: EditText
     private lateinit var btnRegister: Button
     private lateinit var btnLogin: Button
+    private lateinit var database: AppDatabase
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate layout untuk fragment ini
         return inflater.inflate(R.layout.fragment_register, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Inisialisasi view
+        database = AppDatabase.getDatabase(requireContext())
+
         etPhoneNumber = view.findViewById(R.id.etPhoneNumber)
         etFullName = view.findViewById(R.id.etFullName)
         etPassword = view.findViewById(R.id.etPassword)
@@ -38,13 +43,11 @@ class RegisterFragment : Fragment() {
         btnRegister = view.findViewById(R.id.btnRegister)
         btnLogin = view.findViewById(R.id.btnLoginfromRegister)
 
-        // Setup click listeners
         btnRegister.setOnClickListener {
             registerUser()
         }
 
         btnLogin.setOnClickListener {
-            // Kembali ke LoginFragment
             findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
         }
     }
@@ -65,25 +68,31 @@ class RegisterFragment : Fragment() {
             return
         }
 
-        var phoneExists = false
-        for (i in 0 until UserData.users.size) {
-            if (UserData.users[i].phone == phone) {
-                phoneExists = true
-                break
+        lifecycleScope.launch {
+            val existingUser = withContext(Dispatchers.IO) {
+                database.userDao().getUserByPhone(phone)
             }
+
+            if (existingUser != null) {
+                Toast.makeText(requireContext(), "Nomor Telepon telah digunakan", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+            val newUser = User(phone, name, pass)
+            UserData.users.add(newUser)
+
+            withContext(Dispatchers.IO) {
+                database.userDao().insertUser(
+                    UserEntity(
+                        phone = phone,
+                        name = name,
+                        password = pass
+                    )
+                )
+            }
+
+            Toast.makeText(requireContext(), "Register success", Toast.LENGTH_SHORT).show()
+
+            findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
         }
-
-        if (phoneExists) {
-            Toast.makeText(requireContext(), "Nomor Telepon telah digunakan", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val newUser = User(phone, name, pass)
-        UserData.users.add(newUser)
-
-        Toast.makeText(requireContext(), "Register success", Toast.LENGTH_SHORT).show()
-
-        // Kembali ke halaman login
-        findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
     }
 }

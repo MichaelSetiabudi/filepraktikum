@@ -21,7 +21,6 @@ class HomeFragment : Fragment() {
     private lateinit var rvFriends: RecyclerView
     private lateinit var adapter: FriendAdapter
 
-    // Initialize the ViewModel using the by viewModels() delegate
     private val chatViewModel: ChatViewModel by viewModels()
 
     override fun onCreateView(
@@ -43,7 +42,6 @@ class HomeFragment : Fragment() {
 
         rvFriends.layoutManager = LinearLayoutManager(requireContext())
 
-        // Pass the ViewModel to the adapter
         adapter = FriendAdapter(this, chatViewModel)
         rvFriends.adapter = adapter
 
@@ -57,12 +55,6 @@ class HomeFragment : Fragment() {
             findNavController().navigate(R.id.action_homeFragment_to_addFriendFragment)
         }
 
-        // No need for explicit adapter.notifyDataSetChanged() since LiveData will trigger updates
     }
 
-    // We don't need this override anymore as the LiveData in ViewModel handles updates
-    // override fun onResume() {
-    //     super.onResume()
-    //     adapter.notifyDataSetChanged()
-    // }
 }
