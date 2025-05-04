@@ -16,6 +16,8 @@ class UserData {
         val userFriends = mutableMapOf<String, MutableList<String>>()
         val messages = mutableMapOf<String, MutableList<Message>>()
         private lateinit var database: AppDatabase
+        // Added coroutine declaration to match the first file's pattern
+        private val coroutine = CoroutineScope(Dispatchers.IO)
 
         val friends: MutableList<String>
             get() = userFriends[currentUserPhone] ?: mutableListOf()
@@ -23,7 +25,7 @@ class UserData {
         fun initialize(context: Context) {
             database = AppDatabase.getDatabase(context)
 
-            CoroutineScope(Dispatchers.IO).launch {
+            coroutine.launch {
                 loadDataFromDatabase()
             }
         }
@@ -97,7 +99,7 @@ class UserData {
             if (!friends.contains(friendPhone)) {
                 userFriends[currentUserPhone]!!.add(friendPhone)
 
-                CoroutineScope(Dispatchers.IO).launch {
+                coroutine.launch {
                     database.friendDao().insertFriend(
                         FriendEntity(
                             userPhone = currentUserPhone,
@@ -108,7 +110,7 @@ class UserData {
             }
         }
         fun saveUser(user: User) {
-            CoroutineScope(Dispatchers.IO).launch {
+            coroutine.launch {
                 database.userDao().insertUser(
                     UserEntity(
                         phone = user.phone,
@@ -120,7 +122,7 @@ class UserData {
         }
 
         fun saveAllUsers() {
-            CoroutineScope(Dispatchers.IO).launch {
+            coroutine.launch {
                 val userEntities = users.map { user ->
                     UserEntity(
                         phone = user.phone,
@@ -133,7 +135,7 @@ class UserData {
         }
 
         fun saveFriends() {
-            CoroutineScope(Dispatchers.IO).launch {
+            coroutine.launch {
                 val friendEntities = mutableListOf<FriendEntity>()
 
                 userFriends.forEach { (userPhone, friendsList) ->
@@ -152,7 +154,7 @@ class UserData {
         }
 
         fun saveMessage(chatKey: String, message: Message) {
-            CoroutineScope(Dispatchers.IO).launch {
+            coroutine.launch {
                 database.messageDao().insertMessage(
                     MessageEntity(
                         chatKey = chatKey,
@@ -169,7 +171,7 @@ class UserData {
         }
 
         fun saveAllMessages() {
-            CoroutineScope(Dispatchers.IO).launch {
+            coroutine.launch {
                 val messageEntities = mutableListOf<MessageEntity>()
 
                 messages.forEach { (chatKey, messageList) ->
@@ -194,7 +196,7 @@ class UserData {
         }
 
         fun updateMessage(chatKey: String, message: Message) {
-            CoroutineScope(Dispatchers.IO).launch {
+            coroutine.launch {
                 val messages = database.messageDao().getMessagesByChatKey(chatKey)
 
                 // Find the matching message by sender, receiver, content and timestamp
@@ -216,7 +218,7 @@ class UserData {
         }
 
         fun markMessagesAsRead(chatKey: String, userPhone: String) {
-            CoroutineScope(Dispatchers.IO).launch {
+            coroutine.launch {
                 database.messageDao().markMessagesAsRead(chatKey, userPhone)
             }
         }
