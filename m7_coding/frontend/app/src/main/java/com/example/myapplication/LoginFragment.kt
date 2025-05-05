@@ -26,7 +26,6 @@ class LoginFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_login, container, false)
     }
 
@@ -69,7 +68,7 @@ class LoginFragment : Fragment() {
     private fun performLogin(employeeId: String, password: String) {
         lifecycleScope.launch {
             try {
-                val employees = RetrofitInstance.instance.getEmployee()
+                val employees = RetrofitInstance.employee.getEmployee()
 
                 val employee = employees.find { it.id_karyawan == employeeId }
 
@@ -77,7 +76,7 @@ class LoginFragment : Fragment() {
                     val passwordFromDob = convertDobToPassword(employee.dob_karyawan)
 
                     if (password == passwordFromDob) {
-                        navigateBasedOnRole(employee.status_karyawan, employee.nama_karyawan)
+                        navigateBasedOnRole(employeeId, employee.status_karyawan, employee.nama_karyawan)
                     } else {
                         showError("Password salah")
                     }
@@ -105,9 +104,10 @@ class LoginFragment : Fragment() {
         }
     }
 
-    private fun navigateBasedOnRole(statusKaryawan: String, employeeName: String) {
+    private fun navigateBasedOnRole(employeeId: String, statusKaryawan: String, employeeName: String) {
         val bundle = Bundle().apply {
             putString("employeeName", employeeName)
+            putString("employeeId", employeeId)
         }
 
         when (statusKaryawan) {

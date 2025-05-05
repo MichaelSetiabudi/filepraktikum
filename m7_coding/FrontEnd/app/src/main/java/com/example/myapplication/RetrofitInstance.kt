@@ -1,6 +1,8 @@
 package com.example.tutorm7front.network
 
+import com.example.myapplication.CustomerService
 import com.example.myapplication.EmployeeService
+import com.example.myapplication.ProductService
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
@@ -19,7 +21,17 @@ object RetrofitInstance {
             .build()
     }
 
-    val instance: EmployeeService by lazy {
+    val product: ProductService by lazy {
+        retrofit.create(ProductService::class.java)
+    }
+
+    val employee: EmployeeService by lazy {
         retrofit.create(EmployeeService::class.java)
     }
+
+    val customer: CustomerService by lazy {
+        retrofit.create(CustomerService::class.java)
+    }
+
+
 }
