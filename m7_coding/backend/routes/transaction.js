@@ -11,6 +11,69 @@ const db = mysql.createConnection({
   database: 'db_rub'
 });
 
+app.get("/transaction-report/:nama_karyawan", (req, res) => {
+  const { nama_karyawan } = req.params;
+  db.query(
+    `SELECT h.nota_jual as nota_jual, c.nama_customer as nama_customer, k.nama_karyawan as nama_karyawan, p.nama_produk as nama_produk, d.quantity as quantity, p.harga as harga, h.subtotal_jual as subtotal_jual
+      FROM h_jual h
+      join d_jual d on d.nota_jual = h.nota_jual
+      join produk p on p.id_produk = d.id_produk
+      join customer c on c.id_customer = h.id_customer
+      join karyawan k on k.id_karyawan = h.id_karyawan
+      where k.nama_karyawan = ?`,
+    [nama_karyawan],
+    (err, results) => {
+      if (err) return res.status(500).json({ message: err.message });
+      const history = {};
+      results.map((item) => {
+        const detail = `${item.nama_produk} - ${item.quantity} × Rp${item.harga} = Rp${item.subtotal_jual}`;
+        if (!history[item.nota_jual]) {
+          history[item.nota_jual] = {
+            transaction_id: item.nota_jual,
+            customer_name: item.nama_customer,
+            cashier_name: item.nama_karyawan,
+            total: item.subtotal_jual,
+            detail: [],
+          };
+        }
+        history[item.nota_jual].detail.push(detail);
+      });
+      res.status(200).json(Object.values(history));
+    }
+  );
+});
+app.get("/transaction-history/:id_karyawan", (req, res) => {
+  const { id_karyawan } = req.params;
+  db.query(
+    `SELECT h.nota_jual as nota_jual, c.nama_customer as nama_customer, k.nama_karyawan as nama_karyawan, p.nama_produk as nama_produk, d.quantity as quantity, p.harga as harga, h.subtotal_jual as subtotal_jual
+    FROM h_jual h
+    join d_jual d on d.nota_jual = h.nota_jual
+    join produk p on p.id_produk = d.id_produk
+    join customer c on c.id_customer = h.id_customer
+    join karyawan k on k.id_karyawan = h.id_karyawan
+    where h.id_karyawan = ?`,
+    [id_karyawan],
+    (err, results) => {
+      if (err) return res.status(500).json({ message: err.message });
+      const history = {};
+      results.map((item) => {
+        const detail = `${item.nama_produk} - ${item.quantity} × Rp${item.harga} = Rp${item.subtotal_jual}`;
+        if (!history[item.nota_jual]) {
+          history[item.nota_jual] = {
+            transaction_id: item.nota_jual,
+            customer_name: item.nama_customer,
+            cashier_name: item.nama_karyawan,
+            total: item.subtotal_jual,
+            detail: [],
+          };
+        }
+        history[item.nota_jual].detail.push(detail);
+      });
+      res.status(200).json(Object.values(history));
+    }
+  );
+});
+
 // Get all sales transactions
 router.get('/sales', (req, res) => {
   const query = `
@@ -309,54 +372,6 @@ router.post('/sales', (req, res) => {
   });
 });
 
-// Add product rating
-router.post('/rating', (req, res) => {
-  const { nota_jual, id_produk, rating } = req.body;
-  
-  // Validate required fields
-  if (!nota_jual || !id_produk || !rating || rating < 1 || rating > 5) {
-    return res.status(400).json({ 
-      message: 'Transaction ID, Product ID, and Rating (1-5) are required' 
-    });
-  }
-  
-  // Check if the transaction and product exist
-  const checkQuery = `
-    SELECT * FROM d_jual
-    WHERE nota_jual = ? AND id_produk = ?
-  `;
-  
-  db.query(checkQuery, [nota_jual, id_produk], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    
-    if (results.length === 0) {
-      return res.status(404).json({ message: 'Transaction or product not found' });
-    }
-    
-    // Insert or update rating
-    const upsertQuery = `
-      INSERT INTO rating_produk (nota_jual, id_produk, rating)
-      VALUES (?, ?, ?)
-      ON DUPLICATE KEY UPDATE rating = ?
-    `;
-    
-    db.query(upsertQuery, [nota_jual, id_produk, rating, rating], (err, result) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      
-      res.json({
-        message: 'Rating added successfully',
-        nota_jual,
-        id_produk,
-        rating
-      });
-    });
-  });
-});
-
 // Get all purchase transactions
 router.get('/purchase', (req, res) => {
   const query = `
@@ -579,137 +594,5 @@ router.post('/purchase', (req, res) => {
   });
 });
 
-// Get all promo codes
-router.get('/promos', (req, res) => {
-  const query = 'SELECT * FROM promo';
-  
-  db.query(query, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(results);
-  });
-});
-
-// Get a specific promo code
-router.get('/promos/:id', (req, res) => {
-  const promoId = req.params.id;
-  const query = 'SELECT * FROM promo WHERE kode_promo = ?';
-  
-  db.query(query, [promoId], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    
-    if (results.length === 0) {
-      return res.status(404).json({ message: 'Promo code not found' });
-    }
-    
-    res.json(results[0]);
-  });
-});
-
-// Create a new promo code
-router.post('/promos', (req, res) => {
-  const { kode_promo, besar_potongan, maks_potongan, min_pembelian } = req.body;
-  
-  // Validate required fields
-  if (!kode_promo || !besar_potongan || !min_pembelian) {
-    return res.status(400).json({ 
-      message: 'Promo code, discount percentage, and minimum purchase are required' 
-    });
-  }
-  
-  const query = `
-    INSERT INTO promo (kode_promo, besar_potongan, maks_potongan, min_pembelian)
-    VALUES (?, ?, ?, ?)
-  `;
-  
-  db.query(query, [kode_promo, besar_potongan, maks_potongan, min_pembelian], (err, result) => {
-    if (err) {
-      // Check for duplicate entry
-      if (err.code === 'ER_DUP_ENTRY') {
-        return res.status(400).json({ message: 'Promo code already exists' });
-      }
-      return res.status(500).json({ error: err.message });
-    }
-    
-    res.status(201).json({
-      message: 'Promo code created successfully',
-      kode_promo
-    });
-  });
-});
-
-// Update a promo code
-router.put('/promos/:id', (req, res) => {
-  const promoId = req.params.id;
-  const { besar_potongan, maks_potongan, min_pembelian } = req.body;
-  
-  // Validate required fields
-  if (!besar_potongan || !min_pembelian) {
-    return res.status(400).json({ 
-      message: 'Discount percentage and minimum purchase are required' 
-    });
-  }
-  
-  const query = `
-    UPDATE promo
-    SET besar_potongan = ?, maks_potongan = ?, min_pembelian = ?
-    WHERE kode_promo = ?
-  `;
-  
-  db.query(query, [besar_potongan, maks_potongan, min_pembelian, promoId], (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Promo code not found' });
-    }
-    
-    res.json({
-      message: 'Promo code updated successfully',
-      kode_promo: promoId
-    });
-  });
-});
-
-// Delete a promo code
-router.delete('/promos/:id', (req, res) => {
-  const promoId = req.params.id;
-  
-  // Check if the promo is being used
-  const checkQuery = 'SELECT COUNT(*) AS count FROM h_jual WHERE kode_promo = ?';
-  
-  db.query(checkQuery, [promoId], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    
-    if (results[0].count > 0) {
-      return res.status(400).json({ 
-        message: 'Cannot delete promo code as it is used in transactions' 
-      });
-    }
-    
-    const deleteQuery = 'DELETE FROM promo WHERE kode_promo = ?';
-    
-    db.query(deleteQuery, [promoId], (err, result) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: 'Promo code not found' });
-      }
-      
-      res.json({
-        message: 'Promo code deleted successfully',
-        kode_promo: promoId
-      });
-    });
-  });
-});
 
 module.exports = router;

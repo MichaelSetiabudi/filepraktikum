@@ -10,7 +10,6 @@ const db = mysql.createConnection({
     database: 'db_rub'
 });
 
-// Get sales report (daily, weekly, monthly)
 router.get('/sales/:period', (req, res) => {
     const { period } = req.params;
     let query = '';
