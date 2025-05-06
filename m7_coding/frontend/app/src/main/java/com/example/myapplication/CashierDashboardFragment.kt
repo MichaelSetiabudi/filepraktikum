@@ -17,6 +17,9 @@ class CashierDashboardFragment : Fragment() {
     private lateinit var btnGoToSale: Button
     private lateinit var btnCashierLogout: Button
 
+    private var employeeName: String = "Cashier"
+    private var employeeId: String = ""
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -33,19 +36,32 @@ class CashierDashboardFragment : Fragment() {
         btnGoToSale = view.findViewById(R.id.btnGoToSale)
         btnCashierLogout = view.findViewById(R.id.btnLogout)
 
-        val employeeName = arguments?.getString("employeeName") ?: "Cashier"
+        employeeName = arguments?.getString("employeeName") ?: "Cashier"
+        employeeId = arguments?.getString("employeeId") ?: ""
+
         tvCashierWelcome.text = "Welcome, $employeeName"
 
         btnViewInventory.setOnClickListener {
-            findNavController().navigate(R.id.action_cashierDashboardFragment_to_inventoryFragment)
+            val bundle = Bundle().apply {
+                putString("employeeId", employeeId)
+            }
+            findNavController().navigate(R.id.action_cashierDashboardFragment_to_inventoryFragment, bundle)
         }
 
         btnViewTransactionHistory.setOnClickListener {
-            findNavController().navigate(R.id.action_cashierDashboardFragment_to_transactionHistoryFragment)
+            val bundle = Bundle().apply {
+                putString("employeeId", employeeId)
+                putString("employeeName", employeeName)
+            }
+            findNavController().navigate(R.id.action_cashierDashboardFragment_to_transactionHistoryFragment, bundle)
         }
 
         btnGoToSale.setOnClickListener {
-            findNavController().navigate(R.id.action_cashierDashboardFragment_to_saleFragment)
+            val bundle = Bundle().apply {
+                putString("employeeId", employeeId)
+                putString("employeeName", employeeName)
+            }
+            findNavController().navigate(R.id.action_cashierDashboardFragment_to_saleFragment, bundle)
         }
 
         btnCashierLogout.setOnClickListener {

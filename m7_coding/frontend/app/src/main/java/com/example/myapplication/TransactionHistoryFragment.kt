@@ -5,54 +5,97 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [TransactionHistoryFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class TransactionHistoryFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+
+    private lateinit var viewModel: TransactionHistoryViewModel
+    private lateinit var adapter: TransactionHistoryAdapter
+    private lateinit var rvTransactionHistory: RecyclerView
+    private lateinit var btnBackToDashboard: Button
+    private lateinit var progressBar: ProgressBar
+    private lateinit var tvNoTransactions: TextView
+
+    private var employeeId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+        viewModel = ViewModelProvider(this).get(TransactionHistoryViewModel::class.java)
+        employeeId = arguments?.getString("employeeId")
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_transaction_history, container, false)
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Initialize views
+        rvTransactionHistory = view.findViewById(R.id.rvTransactionHistory)
+        btnBackToDashboard = view.findViewById(R.id.btnBackToDashboard)
+
+        // Add progress bar and no transactions text
+        progressBar = view.findViewById(R.id.progressBar)
+        tvNoTransactions = view.findViewById(R.id.tvNoTransactions)
+
+        // Set up recycler view
+        adapter = TransactionHistoryAdapter()
+        rvTransactionHistory.layoutManager = LinearLayoutManager(requireContext())
+        rvTransactionHistory.adapter = adapter
+
+        // Set up button listener
+        btnBackToDashboard.setOnClickListener {
+            findNavController().navigateUp()
+        }
+
+        // Observe viewmodel data
+        viewModel.transactions.observe(viewLifecycleOwner) { transactions ->
+            if (transactions.isEmpty()) {
+                tvNoTransactions.visibility = View.VISIBLE
+                rvTransactionHistory.visibility = View.GONE
+            } else {
+                tvNoTransactions.visibility = View.GONE
+                rvTransactionHistory.visibility = View.VISIBLE
+                adapter.updateTransactions(transactions)
+            }
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+
+        viewModel.error.observe(viewLifecycleOwner) { errorMsg ->
+            if (errorMsg.isNotEmpty()) {
+                Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_LONG).show()
+            }
+        }
+
+        // Load data
+        employeeId?.let { id ->
+            viewModel.getTransactionHistory(id)
+        } ?: run {
+            Toast.makeText(requireContext(), "Employee ID not found", Toast.LENGTH_SHORT).show()
+            findNavController().navigateUp()
+        }
+    }
+
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment TransactionHistoryFragment.
-         */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance(employeeId: String) =
             TransactionHistoryFragment().apply {
                 arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+                    putString("employeeId", employeeId)
                 }
             }
     }

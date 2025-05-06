@@ -14,36 +14,44 @@
         android:padding="16dp">
 
         <TextView
-            android:id="@+id/tvReportTransactionId"
+            android:id="@+id/tvTransactionId"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="PJ20220108001"
-            android:textSize="18sp"
+            android:text="Transaction ID: PJ20220108001"
+            android:textSize="16sp"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/tvReportCustomerName"
+            android:id="@+id/tvCustomerName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:text="Customer: John Doe"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/tvReportProductDetails"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Products: Rubik 3x3 (2), Pyraminx (1)"
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/tvReportTotalPrice"
+            android:id="@+id/tvEmployeeName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Employee: Mac Bob"
+            android:textSize="14sp" />
+
+        <!-- Container for product details -->
+        <LinearLayout
+            android:id="@+id/llProductDetails"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Total: Rp. 250000"
-            android:textSize="16sp"
+            android:orientation="vertical" />
+
+        <TextView
+            android:id="@+id/tvTotalPrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Total: Rp. 1,500,000"
             android:textStyle="bold" />
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>

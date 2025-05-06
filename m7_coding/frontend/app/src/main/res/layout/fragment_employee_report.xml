@@ -42,6 +42,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/spinnerEmployee" />
 
+    <TextView
+        android:id="@+id/tvNoTransactions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No transactions found for this employee"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/rvEmployeeReport"
+        app:layout_constraintEnd_toEndOf="@+id/rvEmployeeReport"
+        app:layout_constraintStart_toStartOf="@+id/rvEmployeeReport"
+        app:layout_constraintTop_toTopOf="@+id/rvEmployeeReport" />
+
     <Button
         android:id="@+id/btnBackToAdminDashboard"
         android:layout_width="wrap_content"

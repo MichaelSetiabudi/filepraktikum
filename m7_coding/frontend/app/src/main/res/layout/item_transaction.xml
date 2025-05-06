@@ -17,16 +17,37 @@
             android:id="@+id/tvTransactionId"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="PJ20220108001"
-            android:textSize="18sp"
+            android:text="Nota: PJ20220108001"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvCustomerName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:text="Customer: John Doe"
-            android:textSize="16sp" />
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvTransactionDetail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Product details here"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvTransactionTotal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="start"
+            android:text="Total: Rp 500.000"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>
