@@ -43,7 +43,6 @@ class TransactionHistoryAdapter : RecyclerView.Adapter<TransactionHistoryAdapter
 
             llProductDetails.removeAllViews()
 
-            // Add each product detail
             for (detail in transaction.detail) {
                 val detailView = TextView(itemView.context).apply {
                     text = detail

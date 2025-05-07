@@ -91,15 +91,12 @@ class EmployeeReportFragment : Fragment() {
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        // Apply the adapter to the spinner
         spinnerEmployee.adapter = adapter
 
         spinnerEmployee.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                // Get the selected employee name
                 val selectedEmployeeName = employeeList[position].nama_karyawan
 
-                // Load transactions for the selected employee
                 loadEmployeeTransactions(selectedEmployeeName)
             }
 

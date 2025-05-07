@@ -26,17 +26,14 @@ class AdminDashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize UI components
         tvAdminWelcome = view.findViewById(R.id.tvAdminWelcome)
         btnViewEmployeeReports = view.findViewById(R.id.btnViewEmployeeReports)
         btnViewSupplyHistory = view.findViewById(R.id.btnViewSupplyHistory)
         btnAdminLogout = view.findViewById(R.id.btnAdminLogout)
 
-        // Get employee name from arguments
         val employeeName = arguments?.getString("employeeName") ?: "Admin"
         tvAdminWelcome.text = "Welcome, $employeeName"
 
-        // Set click listeners
         btnViewEmployeeReports.setOnClickListener {
             findNavController().navigate(R.id.action_adminDashboardFragment_to_employeeReportFragment)
         }
@@ -46,7 +43,6 @@ class AdminDashboardFragment : Fragment() {
         }
 
         btnAdminLogout.setOnClickListener {
-            // Navigate back to login fragment
             findNavController().navigate(R.id.action_adminDashboardFragment_to_loginFragment)
         }
     }

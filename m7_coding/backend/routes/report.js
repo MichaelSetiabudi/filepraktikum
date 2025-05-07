@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const mysql = require('mysql');
 
-// MySQL Connection
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -13,7 +12,7 @@ const db = mysql.createConnection({
 router.get('/sales/:period', (req, res) => {
     const { period } = req.params;
     let query = '';
-    
+
     if (period === 'daily') {
         query = `
             SELECT 
@@ -81,7 +80,7 @@ router.get('/sales/:period', (req, res) => {
             console.error('Error fetching sales report:', err);
             return res.status(500).json({ message: 'Error fetching sales report', error: err });
         }
-        
+
         res.json({
             period: period,
             data: results
@@ -89,7 +88,6 @@ router.get('/sales/:period', (req, res) => {
     });
 });
 
-// Get inventory report
 router.get('/inventory', (req, res) => {
     const query = `
         SELECT 
@@ -115,7 +113,7 @@ router.get('/inventory', (req, res) => {
             console.error('Error fetching inventory report:', err);
             return res.status(500).json({ message: 'Error fetching inventory report', error: err });
         }
-        
+
         res.json({
             total_products: results.length,
             data: results
@@ -123,10 +121,9 @@ router.get('/inventory', (req, res) => {
     });
 });
 
-// Get top selling products
 router.get('/top-products', (req, res) => {
     const limit = req.query.limit || 10;
-    
+
     const query = `
         SELECT 
             p.product_id,
@@ -155,7 +152,7 @@ router.get('/top-products', (req, res) => {
             console.error('Error fetching top products:', err);
             return res.status(500).json({ message: 'Error fetching top products', error: err });
         }
-        
+
         res.json({
             timeframe: 'Last 3 months',
             data: results
@@ -163,10 +160,9 @@ router.get('/top-products', (req, res) => {
     });
 });
 
-// Get customer purchase report
 router.get('/customer-purchases', (req, res) => {
     const limit = req.query.limit || 10;
-    
+
     const query = `
         SELECT 
             c.customer_id,
@@ -194,14 +190,13 @@ router.get('/customer-purchases', (req, res) => {
             console.error('Error fetching customer purchases:', err);
             return res.status(500).json({ message: 'Error fetching customer purchases', error: err });
         }
-        
+
         res.json({
             data: results
         });
     });
 });
 
-// Get revenue by category
 router.get('/category-revenue', (req, res) => {
     const query = `
         SELECT 
@@ -231,7 +226,7 @@ router.get('/category-revenue', (req, res) => {
             console.error('Error fetching category revenue:', err);
             return res.status(500).json({ message: 'Error fetching category revenue', error: err });
         }
-        
+
         res.json({
             timeframe: 'Last 6 months',
             data: results

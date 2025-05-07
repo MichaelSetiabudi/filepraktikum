@@ -1,9 +1,7 @@
-// Routes for transaction operations
 const express = require('express');
 const router = express.Router();
 const mysql = require('mysql');
 
-// MySQL Connection
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -72,7 +70,6 @@ router.get("/transaction-history/:id_karyawan", (req, res) => {
     );
 });
 
-// Get all sales transactions
 router.get('/sales', (req, res) => {
     const query = `
     SELECT h.*, c.nama_customer, k.nama_karyawan, p.kode_promo, p.besar_potongan
@@ -91,7 +88,6 @@ router.get('/sales', (req, res) => {
     });
 });
 
-// Get a specific sales transaction
 router.get('/sales/:id', (req, res) => {
     const salesId = req.params.id;
 
@@ -133,23 +129,18 @@ router.get('/sales/:id', (req, res) => {
         });
     });
 });
-
-// Create a new sales transaction
 router.post('/sales', (req, res) => {
     const { id_customer, id_karyawan, kode_promo, items } = req.body;
 
-    // Validate required fields
     if (!id_customer || !id_karyawan || !items || !items.length) {
         return res.status(400).json({ message: 'Customer ID, Employee ID, and items are required' });
     }
 
-    // Generate new transaction ID
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
 
-    // Get the last transaction number for today
     const datePrefix = `PJ${year}${month}${day}`;
     const getLastIdQuery = `
     SELECT nota_jual
@@ -173,16 +164,13 @@ router.post('/sales', (req, res) => {
 
         const newTransactionId = `${datePrefix}${String(newNumber).padStart(3, '0')}`;
 
-        // Calculate total price
         let harga_total = 0;
 
-        // Start transaction
         db.beginTransaction(err => {
             if (err) {
                 return res.status(500).json({ error: err.message });
             }
 
-            // Get product prices and calculate total
             const productIds = items.map(item => item.id_produk);
             const placeholders = productIds.map(() => '?').join(',');
 
@@ -199,13 +187,11 @@ router.post('/sales', (req, res) => {
                     });
                 }
 
-                // Create a map of product data for easy access
                 const productsMap = {};
                 products.forEach(product => {
                     productsMap[product.id_produk] = product;
                 });
 
-                // Check stock and calculate total price
                 for (const item of items) {
                     const product = productsMap[item.id_produk];
 
@@ -224,7 +210,6 @@ router.post('/sales', (req, res) => {
                     harga_total += product.harga * item.quantity;
                 }
 
-                // Get promo details if applicable
                 let getPromoQuery = '';
                 let subtotal_jual = harga_total;
 
@@ -238,23 +223,18 @@ router.post('/sales', (req, res) => {
                             });
                         }
 
-                        // Apply discount if promo is valid
                         if (promoResults.length > 0) {
                             const promo = promoResults[0];
 
-                            // Check minimum purchase requirement
                             if (harga_total >= promo.min_pembelian) {
-                                // Calculate discount
                                 let discount = (harga_total * promo.besar_potongan) / 100;
 
-                                // Apply maximum discount if applicable
                                 if (promo.maks_potongan && discount > promo.maks_potongan) {
                                     discount = promo.maks_potongan;
                                 }
 
                                 subtotal_jual = harga_total - discount;
                             } else {
-                                // Promo not applicable due to minimum purchase requirement
                                 return db.rollback(() => {
                                     res.status(400).json({
                                         message: `Promo code requires minimum purchase of ${promo.min_pembelian}`
@@ -262,7 +242,6 @@ router.post('/sales', (req, res) => {
                                 });
                             }
                         } else {
-                            // Invalid promo code
                             return db.rollback(() => {
                                 res.status(400).json({ message: 'Invalid promo code' });
                             });
@@ -274,9 +253,7 @@ router.post('/sales', (req, res) => {
                     insertTransaction(subtotal_jual);
                 }
 
-                // Function to insert transaction after calculations
                 function insertTransaction(finalSubtotal) {
-                    // Insert transaction header
                     const headerQuery = `
             INSERT INTO h_jual (nota_jual, id_customer, id_karyawan, harga_total, kode_promo, subtotal_jual)
             VALUES (?, ?, ?, ?, ?, ?)
@@ -296,12 +273,10 @@ router.post('/sales', (req, res) => {
                             });
                         }
 
-                        // Insert transaction details and update stock
                         let detailInsertPromises = [];
                         let stockUpdatePromises = [];
 
                         for (const item of items) {
-                            // Insert transaction detail
                             const detailQuery = `
                 INSERT INTO d_jual (nota_jual, id_produk, quantity)
                 VALUES (?, ?, ?)
@@ -320,7 +295,6 @@ router.post('/sales', (req, res) => {
 
                             detailInsertPromises.push(detailPromise);
 
-                            // Update product stock
                             const updateStockQuery = `
                 UPDATE produk
                 SET stok = stok - ?
@@ -340,10 +314,8 @@ router.post('/sales', (req, res) => {
                             stockUpdatePromises.push(stockPromise);
                         }
 
-                        // Execute all promises
                         Promise.all([...detailInsertPromises, ...stockUpdatePromises])
                             .then(() => {
-                                // Commit transaction
                                 db.commit(err => {
                                     if (err) {
                                         return db.rollback(() => {
@@ -370,7 +342,6 @@ router.post('/sales', (req, res) => {
     });
 });
 
-// Get all purchase transactions
 router.get('/purchase', (req, res) => {
     const query = `
     SELECT h.*, s.nama_supplier, k.nama_karyawan
@@ -388,7 +359,6 @@ router.get('/purchase', (req, res) => {
     });
 });
 
-// Get a specific purchase transaction
 router.get('/purchase/:id', (req, res) => {
     const purchaseId = req.params.id;
 
@@ -429,22 +399,18 @@ router.get('/purchase/:id', (req, res) => {
     });
 });
 
-// Create a new purchase transaction
 router.post('/purchase', (req, res) => {
     const { id_supplier, id_karyawan, items } = req.body;
 
-    // Validate required fields
     if (!id_supplier || !id_karyawan || !items || !items.length) {
         return res.status(400).json({ message: 'Supplier ID, Employee ID, and items are required' });
     }
 
-    // Generate new transaction ID
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
 
-    // Get the last transaction number for today
     const datePrefix = `PB${year}${month}${day}`;
     const getLastIdQuery = `
     SELECT nota_beli
@@ -468,19 +434,16 @@ router.post('/purchase', (req, res) => {
 
         const newTransactionId = `${datePrefix}${String(newNumber).padStart(3, '0')}`;
 
-        // Calculate subtotal
         let subtotal_beli = 0;
         for (const item of items) {
             subtotal_beli += item.harga_beli * item.quantity;
         }
 
-        // Start transaction
         db.beginTransaction(err => {
             if (err) {
                 return res.status(500).json({ error: err.message });
             }
 
-            // Insert transaction header
             const headerQuery = `
         INSERT INTO h_beli (nota_beli, id_karyawan, id_supplier, subtotal_beli)
         VALUES (?, ?, ?, ?)
@@ -498,12 +461,10 @@ router.post('/purchase', (req, res) => {
                     });
                 }
 
-                // Insert transaction details and update stock
                 let detailInsertPromises = [];
                 let stockUpdatePromises = [];
 
                 for (const item of items) {
-                    // Check if product exists
                     const checkProductQuery = `
             SELECT id_produk FROM produk WHERE id_produk = ?
           `;
@@ -521,7 +482,6 @@ router.post('/purchase', (req, res) => {
                             });
                         }
 
-                        // Insert transaction detail
                         const detailQuery = `
               INSERT INTO d_beli (nota_beli, id_produk, harga_beli, quantity)
               VALUES (?, ?, ?, ?)
@@ -541,7 +501,6 @@ router.post('/purchase', (req, res) => {
 
                         detailInsertPromises.push(detailPromise);
 
-                        // Update product stock
                         const updateStockQuery = `
               UPDATE produk
               SET stok = stok + ?
@@ -562,11 +521,9 @@ router.post('/purchase', (req, res) => {
                     });
                 }
 
-                // Wait for all database operations to complete
                 setTimeout(() => {
                     Promise.all([...detailInsertPromises, ...stockUpdatePromises])
                         .then(() => {
-                            // Commit transaction
                             db.commit(err => {
                                 if (err) {
                                     return db.rollback(() => {
